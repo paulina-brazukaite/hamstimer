@@ -1,7 +1,28 @@
+import type { Metadata } from "next";
 import { FocusScreen } from "@/components/focus-screen";
+import { FirstVisitIntro } from "@/components/first-visit-intro";
+import { TAGLINE } from "@/lib/site";
 
-// "/" is a Server Component that just renders the (client-side) focus screen.
-// The timer itself needs the browser (localStorage, keyboard, clock).
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: { url: "/" },
+};
+
+// "/" is a Server Component: the intro below is plain HTML from the server, and
+// FocusScreen (a Client Component) runs the timer in the browser.
 export default function Home() {
-  return <FocusScreen />;
+  return (
+    <FocusScreen
+      intro={
+        <FirstVisitIntro>
+          <h1 className="text-xl font-semibold tracking-tight text-balance text-fg sm:text-2xl">{TAGLINE}</h1>
+          <p className="mt-3 text-[15px] leading-relaxed text-pretty text-muted">
+            Write one line about what you&apos;re working on and press Enter. When you pause or stop, note your
+            next step. Next time, Nextline opens on exactly where you left off: one key to resume.
+          </p>
+          <p className="mt-3 font-mono text-xs text-faint">No account · your data stays in this browser</p>
+        </FirstVisitIntro>
+      }
+    />
+  );
 }

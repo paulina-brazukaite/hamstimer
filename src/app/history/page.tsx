@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { HistoryScreen } from "@/components/history-screen";
 
 export const metadata: Metadata = {
-  title: "History · Nextline",
+  title: "History",
   // Personal data lives in the visitor's browser; nothing here for search engines.
   robots: { index: false },
 };

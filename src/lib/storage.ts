@@ -39,4 +39,6 @@ export const KEYS = {
   timer: "nextline:timer",
   history: "nextline:history",
   settings: "nextline:settings",
+  /** Set once the first session starts; hides the first-visit intro on /. */
+  onboarded: "nextline:onboarded",
 } as const;

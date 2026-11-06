@@ -131,6 +131,14 @@ export function update(action: (s: TimerState, now: number) => TimerState) {
   const now = Date.now();
   const state = action(tick(snapshot.state, now), now);
   saveTimer(state);
+  if (state.phase === "focus") markOnboarded();
   snapshot = { state, now, resume: false };
   emit();
+}
+
+/** First session started: from now on "/" skips the first-visit intro. */
+function markOnboarded() {
+  if (document.documentElement.dataset.returning) return;
+  document.documentElement.dataset.returning = "1";
+  writeJSON(KEYS.onboarded, true);
 }

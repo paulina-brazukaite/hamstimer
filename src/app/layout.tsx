@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { KEYS } from "@/lib/storage";
+import { DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import { InlineScript } from "@/components/inline-script";
 import { CommandMenu } from "@/components/command-menu";
 import { SessionAlerts } from "@/components/session-alerts";
@@ -12,18 +13,26 @@ import { ServiceWorker } from "@/components/service-worker";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Nextline · focus timer",
-  description:
-    "A focus timer that remembers where your head was. Save your next step when you stop, pick it up in one key when you come back.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME}: a focus timer that remembers where you were`,
+    template: `%s · ${SITE_NAME}`, // pages set just their own part, e.g. "History"
+  },
+  description: DESCRIPTION,
+  applicationName: SITE_NAME,
+  openGraph: { type: "website", siteName: SITE_NAME },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
   themeColor: "#0f1012",
 };
 
-// Runs during HTML parsing, before first paint, so a saved light theme never
-// flashes dark first. Wrapped in try/catch because localStorage can throw.
-const themeScript = `try{var t=JSON.parse(localStorage.getItem("${KEYS.theme}"));if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
+// Runs during HTML parsing, before first paint, so nothing flashes:
+// - a saved light theme is applied before the dark default shows;
+// - returning visitors get data-returning, which collapses the first-visit intro (CSS).
+// Wrapped in try/catch because localStorage can throw.
+const beforePaintScript = `try{var d=document.documentElement,l=localStorage,t=JSON.parse(l.getItem("${KEYS.theme}"));if(t==="light"||t==="dark")d.dataset.theme=t;if(l.getItem("${KEYS.onboarded}"))d.dataset.returning="1"}catch(e){}`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -34,7 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}
     >
       <head>
-        <InlineScript html={themeScript} />
+        <InlineScript html={beforePaintScript} />
       </head>
       <body className="flex min-h-full flex-col bg-ground font-sans text-fg">
         {children}

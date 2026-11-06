@@ -74,3 +74,23 @@ body {
     animation: rise-in 240ms ease-out both;
   }
 }
+
+/*
+  First-visit intro on "/" (see first-visit-intro.tsx). New visitors see the text;
+  returning ones (html[data-returning], set before paint) see a one-line toggle.
+*/
+.first-visit-toggle {
+  display: none;
+}
+[data-returning] .first-visit {
+  padding-top: 1.5rem;
+}
+[data-returning] .first-visit-toggle {
+  display: block;
+}
+[data-returning] .first-visit:not(.is-open) .first-visit-full {
+  display: none;
+}
+[data-returning] .first-visit.is-open .first-visit-full {
+  margin-bottom: 0.75rem;
+}

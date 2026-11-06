@@ -23,8 +23,15 @@ export function AppHeader({ links = [] }: { links?: { href: string; label: strin
             {l.label}
           </Link>
         ))}
-        <button type="button" onClick={openCommandMenu} className={navLink} aria-label="Open command menu">
-          {mod} K
+        <button
+          type="button"
+          onClick={openCommandMenu}
+          className={navLink}
+          aria-label="Open command menu"
+        >
+          {/* Keyboard users see the shortcut; touch screens get a plain label. */}
+          <span className="pointer-coarse:hidden">{mod} K</span>
+          <span className="hidden pointer-coarse:inline">Menu</span>
         </button>
         <ThemeToggle />
       </nav>

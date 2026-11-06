@@ -29,6 +29,9 @@ src/
     page.tsx        "/" (renders the focus screen)
     history/        "/history": session list + JSON export/import
     manifest.ts     PWA manifest (/manifest.webmanifest)
+    timer/[preset]/ one template for /timer/50-10, /timer/25-5, /timer/90-minute
+    about/          "/about"
+    sitemap.ts, robots.ts, opengraph-image.tsx   SEO (all static at build time)
     icon.svg, apple-icon.png   favicons (Next file conventions)
   components/       UI pieces ("use client" where they need the browser)
                     focus-screen.tsx is "/": resume card or timer view
@@ -40,6 +43,9 @@ src/
     history.ts      history entries + backup format (+ history.test.ts)
     use-stored.ts   React hooks: a localStorage key kept live, settings, ⌘/Ctrl
     settings.ts     sound + notification preferences (nextline:settings)
+    site.ts         site URL, name, tagline (set NEXT_PUBLIC_SITE_URL for a custom domain)
+    timer-pages.ts  content for the /timer/* landing pages (add one = add an entry)
+    og.tsx          shared Open Graph image design
     sound.ts        end-of-focus chime (Web Audio, no file)
     theme.ts        light/dark toggle
     backup-actions.ts  export download / import file (browser side)
