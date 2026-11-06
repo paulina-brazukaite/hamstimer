@@ -213,6 +213,8 @@ function useCommands(): Command[] {
   // Navigation
   if (pathname !== "/") add("Go to", "Timer", () => router.push("/"));
   if (pathname !== "/history") add("Go to", "History", () => router.push("/history"));
+  if (pathname !== "/blog") add("Go to", "Blog", () => router.push("/blog"));
+  if (pathname !== "/about") add("Go to", "About", () => router.push("/about"));
 
   // Data
   add("Data", "Export backup", exportBackup);

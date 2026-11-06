@@ -16,6 +16,9 @@ export function SiteFooter() {
             {p.heading}
           </Link>
         ))}
+        <Link href="/blog" className={link}>
+          Blog
+        </Link>
         <Link href="/about" className={link}>
           About
         </Link>

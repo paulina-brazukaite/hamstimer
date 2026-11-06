@@ -23,7 +23,8 @@ function toArrayBuffer(base64: string): ArrayBuffer {
   return new Uint8Array(Buffer.from(base64, "base64")).buffer;
 }
 
-export async function renderOg({ title, clock }: { title: string; clock: string }) {
+/** With `clock`: big timer + title (home, timer pages). Without: small eyebrow + large title (blog). */
+export async function renderOg({ title, clock, eyebrow }: { title: string; clock?: string; eyebrow?: string }) {
   const [sans, sansBold, mono] = (await loadFonts()).map(toArrayBuffer);
 
   return new ImageResponse(
@@ -51,8 +52,24 @@ export async function renderOg({ title, clock }: { title: string; clock: string 
         </div>
 
         <div style={{ display: "flex", flex: 1, flexDirection: "column", justifyContent: "center" }}>
-          <div style={{ display: "flex", fontFamily: "Geist Mono", fontSize: 168, letterSpacing: -8, lineHeight: 1 }}>{clock}</div>
-          <div style={{ display: "flex", marginTop: 28, fontSize: 46, fontWeight: 600, color: "#ece9e3", maxWidth: 980 }}>
+          {clock ? (
+            <div style={{ display: "flex", fontFamily: "Geist Mono", fontSize: 168, letterSpacing: -8, lineHeight: 1 }}>
+              {clock}
+            </div>
+          ) : (
+            <div style={{ display: "flex", fontFamily: "Geist Mono", fontSize: 28, color: "#9a9ea6" }}>{eyebrow}</div>
+          )}
+          <div
+            style={{
+              display: "flex",
+              marginTop: 28,
+              fontSize: clock ? 46 : 64,
+              fontWeight: 600,
+              lineHeight: 1.15,
+              color: "#ece9e3",
+              maxWidth: 1040,
+            }}
+          >
             {title}
           </div>
         </div>

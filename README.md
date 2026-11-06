@@ -31,6 +31,7 @@ src/
     manifest.ts     PWA manifest (/manifest.webmanifest)
     timer/[preset]/ one template for /timer/50-10, /timer/25-5, /timer/90-minute
     about/          "/about"
+    blog/           "/blog" and "/blog/[slug]" (static, one page per post)
     sitemap.ts, robots.ts, opengraph-image.tsx   SEO (all static at build time)
     icon.svg, apple-icon.png   favicons (Next file conventions)
   components/       UI pieces ("use client" where they need the browser)
@@ -46,6 +47,7 @@ src/
     site.ts         site URL, name, tagline (set NEXT_PUBLIC_SITE_URL for a custom domain)
     timer-pages.ts  content for the /timer/* landing pages (add one = add an entry)
     og.tsx          shared Open Graph image design
+    blog/           BlogSource interface (types.ts), Markdown files source, sanitising renderer
     sound.ts        end-of-focus chime (Web Audio, no file)
     theme.ts        light/dark toggle
     backup-actions.ts  export download / import file (browser side)
@@ -82,3 +84,12 @@ src/
   stop the server, reload.
 - After changing what it caches, bump `VERSION` at the top of `sw.js`.
 - Icons: edit `scripts/generate-icons.mjs`, then run `node scripts/generate-icons.mjs`.
+
+## Blog
+
+- Posts are Markdown files in `content/blog/<slug>.md` (the file name is the URL). Front matter:
+  `title`, `description`, `date` (and optionally `image`, `draft: true`). See the placeholder post.
+- Commit + push → Vercel rebuilds → the post is live, in the sitemap, with its own share image.
+- Pages only use the `BlogSource` interface (`src/lib/blog/types.ts`). To move posts to a CMS or
+  database, write another source and change the one line in `src/lib/blog/index.ts`.
+- All post HTML is sanitised at build time, so pasted HTML can't run scripts.
