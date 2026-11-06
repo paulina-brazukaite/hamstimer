@@ -8,9 +8,11 @@ import { NextNote, NoteBoard } from "@/components/note-board";
 import { ResumeCard } from "@/components/resume-card";
 import { getSnapshot, update } from "@/lib/timer-store";
 import { useTimer } from "@/lib/use-timer";
+import { useModKey } from "@/lib/use-stored";
 import {
   EXTENSION_MS,
   extend,
+  openNote,
   formatClock,
   isRunning,
   phaseLength,
@@ -64,6 +66,7 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
   const active = phase === "focus" || phase === "break";
   const label = state.intention || "Focus";
   const showIntentionInput = !state.notePrompt && (phase === "idle" || phase === "complete");
+  const mod = useModKey();
 
   return (
     <>
@@ -133,6 +136,8 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
         {showIntentionInput && <Hint k="Enter" label="start" />}
         {active && !state.notePrompt && <Hint k="Space" label={running ? "pause" : "resume"} />}
         {active && <Hint k="E" label="+15 min" />}
+        {phase !== "idle" && !state.notePrompt && <Hint k="N" label="note" />}
+        <Hint k={`${mod} K`} label="menu" />
       </footer>
     </>
   );
@@ -166,7 +171,7 @@ function useDocumentTitle(state: TimerState | undefined, now: number, resuming: 
   }, [title]);
 }
 
-/** Space start/pause and E +15 min. Registered once; handlers call the store directly. */
+/** Space start/pause, E +15 min, N note. Registered once; handlers call the store directly. */
 function useTimerShortcuts() {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -180,6 +185,9 @@ function useTimerShortcuts() {
         update(toggle);
       } else if (e.key === "e" || e.key === "E") {
         update(extend);
+      } else if (e.key === "n" || e.key === "N") {
+        e.preventDefault(); // don't type the "n" into the note box that opens
+        update(openNote);
       }
     }
     window.addEventListener("keydown", onKey);

@@ -9,6 +9,7 @@ import {
   shouldOfferResume,
   startFresh,
   dismissNote,
+  openNote,
   parseTimer,
   pause,
   saveNote,
@@ -250,5 +251,19 @@ describe("resume card", () => {
     expect(formatAgo(120 * MIN)).toBe("2h ago");
     expect(formatAgo(30 * 60 * MIN)).toBe("yesterday");
     expect(formatAgo(80 * 60 * MIN)).toBe("3d ago");
+  });
+});
+
+describe("N: note on demand", () => {
+  it("opens the board while running, without pausing", () => {
+    const s = openNote(start(createTimer(), T0));
+    expect(s.notePrompt).toBe("note");
+    expect(s.startedAt).toBe(T0);
+  });
+
+  it("does nothing before a session or when a board is already open", () => {
+    expect(openNote(createTimer()).notePrompt).toBeNull();
+    const paused = pause(start(createTimer(), T0), T0 + MIN);
+    expect(openNote(paused).notePrompt).toBe("pause");
   });
 });

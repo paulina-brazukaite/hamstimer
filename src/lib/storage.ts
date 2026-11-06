@@ -38,4 +38,5 @@ export const KEYS = {
   theme: "nextline:theme",
   timer: "nextline:timer",
   history: "nextline:history",
+  settings: "nextline:settings",
 } as const;

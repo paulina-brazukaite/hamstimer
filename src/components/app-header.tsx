@@ -1,11 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { openCommandMenu } from "@/components/command-menu";
+import { useModKey } from "@/lib/use-stored";
 
 const navLink =
   "inline-flex min-h-9 items-center rounded-lg px-3 font-mono text-xs text-muted transition-colors hover:text-fg";
 
-/** Logo (links home), optional nav links, theme toggle. Used on every app screen. */
+/** Logo (links home), nav links, the ⌘K menu button, theme toggle. Used on every app screen. */
 export function AppHeader({ links = [] }: { links?: { href: string; label: string }[] }) {
+  const mod = useModKey();
   return (
     <header className="flex items-center justify-between gap-4 px-6 pt-6 sm:px-10">
       <Link href="/" className="flex items-center gap-2.5 rounded-lg">
@@ -18,6 +23,9 @@ export function AppHeader({ links = [] }: { links?: { href: string; label: strin
             {l.label}
           </Link>
         ))}
+        <button type="button" onClick={openCommandMenu} className={navLink} aria-label="Open command menu">
+          {mod} K
+        </button>
         <ThemeToggle />
       </nav>
     </header>

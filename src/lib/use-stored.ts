@@ -1,5 +1,6 @@
-import { useSyncExternalStore } from "react";
-import { CHANGED } from "./storage";
+import { useMemo, useSyncExternalStore } from "react";
+import { CHANGED, KEYS } from "./storage";
+import { DEFAULT_SETTINGS, parseSettings, type Settings } from "./settings";
 
 function subscribe(onChange: () => void) {
   window.addEventListener("storage", onChange); // other tabs
@@ -26,5 +27,28 @@ export function useStoredRaw(key: string): string | null | undefined {
       }
     },
     () => undefined,
+  );
+}
+
+/** Sound / notification settings, kept live. Defaults on the server. */
+export function useSettings(): Settings {
+  const raw = useStoredRaw(KEYS.settings);
+  return useMemo(() => {
+    try {
+      return parseSettings(raw ? JSON.parse(raw) : null);
+    } catch {
+      return DEFAULT_SETTINGS;
+    }
+  }, [raw]);
+}
+
+const noop = () => () => {};
+
+/** "⌘" on Apple devices, "Ctrl" elsewhere. Server render says "Ctrl", then React corrects it. */
+export function useModKey(): string {
+  return useSyncExternalStore(
+    noop,
+    () => (/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘" : "Ctrl"),
+    () => "Ctrl",
   );
 }

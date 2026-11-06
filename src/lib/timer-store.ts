@@ -17,7 +17,8 @@ export interface TimerSnapshot {
 
 let snapshot: TimerSnapshot | null = null; // null until loaded in the browser
 const listeners = new Set<() => void>();
-let clock: ReturnType<typeof setInterval> | null = null;
+let stopClock: (() => void) | null = null;
+const focusEndListeners = new Set<(s: TimerState) => void>();
 
 function load(): TimerSnapshot {
   const now = Date.now();
@@ -45,8 +46,39 @@ function refresh() {
   const now = Date.now();
   const state = tick(snapshot.state, now);
   if (state !== snapshot.state) saveTimer(state);
+  const focusJustEnded =
+    snapshot.state.phase === "focus" &&
+    state.phase !== "focus" &&
+    state.leftAt !== null &&
+    now - state.leftAt < 2 * 60_000; // not after the laptop slept for an hour
   snapshot = { ...snapshot, state, now };
   emit();
+  if (focusJustEnded) focusEndListeners.forEach((l) => l(state));
+}
+
+/** Called once when focus runs out while the app is open (for the chime and notification). */
+export function onFocusEnd(listener: (s: TimerState) => void): () => void {
+  focusEndListeners.add(listener);
+  return () => focusEndListeners.delete(listener);
+}
+
+/**
+ * Calls `fn` every 250 ms. Uses a tiny Web Worker when possible: timers inside a
+ * worker aren't slowed down in background tabs the way page timers are (Chrome
+ * can delay those by up to a minute), so the chime plays on time.
+ */
+function startClock(fn: () => void): () => void {
+  try {
+    const code = "setInterval(() => postMessage(0), 250)";
+    const url = URL.createObjectURL(new Blob([code], { type: "text/javascript" }));
+    const worker = new Worker(url);
+    URL.revokeObjectURL(url);
+    worker.onmessage = fn;
+    return () => worker.terminate();
+  } catch {
+    const id = setInterval(fn, 250);
+    return () => clearInterval(id);
+  }
 }
 
 function onVisible() {
@@ -63,18 +95,18 @@ function onStorage(e: StorageEvent) {
 export function subscribe(listener: () => void): () => void {
   if (listeners.size === 0) {
     snapshot ??= load();
-    // 250 ms keeps the seconds flip crisp. Browsers throttle this in background
-    // tabs, which is fine: time comes from Date.now(), not from counting ticks.
-    clock = setInterval(refresh, 250);
+    // 250 ms keeps the seconds flip crisp. Time itself always comes from
+    // Date.now(), never from counting ticks.
+    stopClock = startClock(refresh);
     document.addEventListener("visibilitychange", onVisible);
     window.addEventListener("storage", onStorage);
   }
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
-    if (listeners.size === 0 && clock) {
-      clearInterval(clock);
-      clock = null;
+    if (listeners.size === 0 && stopClock) {
+      stopClock();
+      stopClock = null;
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("storage", onStorage);
     }

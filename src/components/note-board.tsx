@@ -7,6 +7,7 @@ const HEADINGS: Record<NotePrompt, string> = {
   pause: "Paused",
   stop: "Stopped",
   end: "Focus done",
+  note: "Note",
 };
 
 /**

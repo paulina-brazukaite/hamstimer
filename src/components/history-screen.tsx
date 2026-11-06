@@ -4,14 +4,8 @@ import { useMemo, useRef, useState } from "react";
 import { AppHeader } from "@/components/app-header";
 import { KEYS } from "@/lib/storage";
 import { useStoredRaw } from "@/lib/use-stored";
-import {
-  PREFIX,
-  createBackup,
-  formatDuration,
-  parseBackup,
-  parseHistory,
-  type HistoryEntry,
-} from "@/lib/history";
+import { formatDuration, parseHistory, type HistoryEntry } from "@/lib/history";
+import { exportBackup, importBackupFile } from "@/lib/backup-actions";
 
 const button =
   "inline-flex min-h-9 items-center rounded-lg border border-line px-3 font-mono text-xs text-muted transition-colors hover:text-fg";
@@ -24,39 +18,8 @@ export function HistoryScreen() {
   const fileInput = useRef<HTMLInputElement>(null);
 
   function exportData() {
-    const backup = createBackup(window.localStorage, new Date());
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `nextline-backup-${backup.exportedAt.slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    exportBackup();
     setMessage("Backup downloaded.");
-  }
-
-  async function importData(file: File) {
-    try {
-      const backup = parseBackup(await file.text());
-      const when = backup.exportedAt ? ` from ${new Date(backup.exportedAt).toLocaleString()}` : "";
-      if (!window.confirm(`Replace all your Nextline data with this backup${when}? This can't be undone.`)) {
-        return;
-      }
-      // Clear our keys first so nothing from before the backup lingers.
-      const ours: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key?.startsWith(PREFIX)) ours.push(key);
-      }
-      ours.forEach((key) => localStorage.removeItem(key));
-      for (const [key, value] of Object.entries(backup.data)) {
-        localStorage.setItem(key, JSON.stringify(value));
-      }
-      // Reload so the theme, timer and history all pick up the restored data.
-      window.location.reload();
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Couldn't import that file.");
-    }
   }
 
   return (
@@ -81,7 +44,7 @@ export function HistoryScreen() {
               onChange={(e) => {
                 const file = e.currentTarget.files?.[0];
                 e.currentTarget.value = ""; // allow picking the same file again
-                if (file) void importData(file);
+                if (file) void importBackupFile(file).then((error) => error && setMessage(error));
               }}
             />
           </div>

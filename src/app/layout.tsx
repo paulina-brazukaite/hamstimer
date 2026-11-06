@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 // Fonts ship inside the `geist` package (no Google Fonts request at build or
 // runtime), which also means they work offline once the PWA is installed.
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { KEYS } from "@/lib/storage";
 import { InlineScript } from "@/components/inline-script";
+import { CommandMenu } from "@/components/command-menu";
+import { SessionAlerts } from "@/components/session-alerts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -34,6 +37,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col bg-ground font-sans text-fg">
         {children}
+        <SessionAlerts />
+        {/* Suspense: the menu reads the URL (usePathname), which some pages only know at request time. */}
+        <Suspense fallback={null}>
+          <CommandMenu />
+        </Suspense>
       </body>
     </html>
   );

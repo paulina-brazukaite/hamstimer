@@ -36,7 +36,11 @@ src/
     timer-store.ts  engine + clock + localStorage, subscribable from React
     use-timer.ts    React hook over the store (useSyncExternalStore)
     history.ts      history entries + backup format (+ history.test.ts)
-    use-stored.ts   React hook: a localStorage key, kept live
+    use-stored.ts   React hooks: a localStorage key kept live, settings, ⌘/Ctrl
+    settings.ts     sound + notification preferences (nextline:settings)
+    sound.ts        end-of-focus chime (Web Audio, no file)
+    theme.ts        light/dark toggle
+    backup-actions.ts  export download / import file (browser side)
 ```
 
 ## Conventions
@@ -49,3 +53,15 @@ src/
 - **Storage:** always go through `lib/storage.ts`. Every key starts with `nextline:`.
 - **Next.js version:** this is Next 16. Read `node_modules/next/dist/docs/` before reaching for
   an API from memory (see AGENTS.md).
+
+## Keyboard
+
+| Key | Where | Does |
+| --- | --- | --- |
+| ⌘K / Ctrl+K | anywhere | command menu (every action is in here) |
+| Enter | intention box | start |
+| Space | timer | start / pause / resume |
+| E | timer | +15 min (on break: back to focus for 15 min) |
+| N | timer | write a "Where was I?" note |
+| Enter / Esc | note board | save / skip |
+| R / Esc | resume card | resume / start fresh |

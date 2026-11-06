@@ -14,6 +14,7 @@ export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+      if ((e.target as HTMLElement | null)?.tagName === "INPUT") return; // e.g. typing in the command menu
       if (e.key === "r" || e.key === "R") {
         e.preventDefault();
         update(resumeSession);

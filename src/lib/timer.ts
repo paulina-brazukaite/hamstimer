@@ -54,7 +54,7 @@ export interface TimerState {
   leftAt: number | null;
 }
 
-export type NotePrompt = "pause" | "stop" | "end";
+export type NotePrompt = "pause" | "stop" | "end" | "note";
 
 export const MAX_INTENTION = 120;
 export const MAX_NOTE = 200;
@@ -244,6 +244,12 @@ export function saveNote(s: TimerState, text: string): TimerState {
   return { ...s, note: note || s.note, notePrompt: null };
 }
 
+/** N: open the board on demand, any time after the session started. The timer keeps going. */
+export function openNote(s: TimerState): TimerState {
+  if (s.phase === "idle" || s.notePrompt !== null) return s;
+  return { ...s, notePrompt: "note" };
+}
+
 /** Esc on the board. */
 export function dismissNote(s: TimerState): TimerState {
   return s.notePrompt === null ? s : { ...s, notePrompt: null };
@@ -312,7 +318,7 @@ export function parseTimer(raw: unknown): TimerState | null {
     typeof s.intention === "string";
   if (!ok) return null;
   // Fields added after the first release get defaults, so old saves still load.
-  const prompts: NotePrompt[] = ["pause", "stop", "end"];
+  const prompts: NotePrompt[] = ["pause", "stop", "end", "note"];
   return {
     ...(s as TimerState),
     note: typeof s.note === "string" ? s.note : "",
