@@ -5,11 +5,13 @@
 // React's built-in way to subscribe to data that lives outside React.
 
 import { KEYS, readJSON, writeJSON } from "./storage";
-import { createTimer, parseTimer, tick, type TimerState } from "./timer";
+import { createTimer, parseTimer, shouldOfferResume, tick, type TimerState } from "./timer";
 
 export interface TimerSnapshot {
   state: TimerState;
   now: number;
+  /** Show the resume card. Decided once per page load; any action closes it. */
+  resume: boolean;
 }
 
 let snapshot: TimerSnapshot | null = null; // null until loaded in the browser
@@ -21,7 +23,7 @@ function load(): TimerSnapshot {
   const saved = parseTimer(readJSON<unknown>(KEYS.timer, null));
   const state = tick(saved ?? createTimer(), now);
   if (state !== saved) writeJSON(KEYS.timer, state);
-  return { state, now };
+  return { state, now, resume: shouldOfferResume(state) };
 }
 
 function emit() {
@@ -34,7 +36,7 @@ function refresh() {
   const now = Date.now();
   const state = tick(snapshot.state, now);
   if (state !== snapshot.state) writeJSON(KEYS.timer, state);
-  snapshot = { state, now };
+  snapshot = { ...snapshot, state, now };
   emit();
 }
 
@@ -45,7 +47,7 @@ function onVisible() {
 /** Another tab changed the timer: pick up its version. */
 function onStorage(e: StorageEvent) {
   if (e.key !== KEYS.timer) return;
-  snapshot = load();
+  snapshot = { ...load(), resume: snapshot?.resume ?? false };
   emit();
 }
 
@@ -88,6 +90,6 @@ export function update(action: (s: TimerState, now: number) => TimerState) {
   const now = Date.now();
   const state = action(tick(snapshot.state, now), now);
   writeJSON(KEYS.timer, state);
-  snapshot = { state, now };
+  snapshot = { state, now, resume: false };
   emit();
 }

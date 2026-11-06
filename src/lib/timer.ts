@@ -48,6 +48,10 @@ export interface TimerState {
   note: string;
   /** Why the "Where was I?" board is open, or null when it's closed. */
   notePrompt: NotePrompt | null;
+  /** Focus time done this session, as of `leftAt`. Used by the resume card. */
+  focusedMs: number;
+  /** When you last stepped away: paused, stopped, or focus ran out. */
+  leftAt: number | null;
 }
 
 export type NotePrompt = "pause" | "stop" | "end";
@@ -72,6 +76,8 @@ export function createTimer(presetId: PresetId = DEFAULT_PRESET, focusMin?: numb
     intention: "",
     note: "",
     notePrompt: null,
+    focusedMs: 0,
+    leftAt: null,
   };
 }
 
@@ -137,7 +143,15 @@ export function tick(s: TimerState, now: number): TimerState {
     // Focus ending is the "session end" moment: ask where you were while it's fresh.
     next =
       next.phase === "focus"
-        ? { ...next, phase: "break", elapsedMs: 0, startedAt: endsAt, notePrompt: "end" }
+        ? {
+            ...next,
+            phase: "break",
+            elapsedMs: 0,
+            startedAt: endsAt,
+            notePrompt: "end",
+            focusedMs: next.focusMs,
+            leftAt: endsAt,
+          }
         : { ...next, phase: "complete", elapsedMs: 0, startedAt: null };
   }
   return next;
@@ -156,13 +170,68 @@ export function start(s: TimerState, now: number): TimerState {
 /** Pausing opens the "Where was I?" board. */
 export function pause(s: TimerState, now: number): TimerState {
   if (!isRunning(s)) return s;
-  return { ...s, elapsedMs: phaseElapsed(s, now), startedAt: null, notePrompt: "pause" };
+  return {
+    ...s,
+    elapsedMs: phaseElapsed(s, now),
+    startedAt: null,
+    notePrompt: "pause",
+    focusedMs: focusedSoFar(s, now),
+    leftAt: now,
+  };
 }
 
 /** End the session early. Keeps intention and note, and asks "Where was I?". */
-export function stop(s: TimerState): TimerState {
+export function stop(s: TimerState, now: number): TimerState {
   if (s.phase !== "focus" && s.phase !== "break") return s;
-  return { ...s, phase: "complete", startedAt: null, elapsedMs: 0, notePrompt: "stop" };
+  return {
+    ...s,
+    phase: "complete",
+    startedAt: null,
+    elapsedMs: 0,
+    notePrompt: "stop",
+    focusedMs: focusedSoFar(s, now),
+    leftAt: now,
+  };
+}
+
+/** Focus done this session. Once on break, the whole focus block counts. */
+function focusedSoFar(s: TimerState, now: number): number {
+  return s.phase === "focus" ? phaseElapsed(s, now) : s.focusMs;
+}
+
+// ---- The resume card ---------------------------------------------------------
+
+/**
+ * Should a fresh page load open on the resume card? Yes when there's a session
+ * with an intention that you stepped away from. A session still running (you
+ * just reloaded) carries on without a card.
+ */
+export function shouldOfferResume(s: TimerState): boolean {
+  if (!s.intention || s.leftAt === null) return false;
+  if (s.phase === "idle") return false;
+  return !isRunning(s);
+}
+
+/** R: continue a paused focus block, otherwise a new session with the same intention and note. */
+export function resumeSession(s: TimerState, now: number): TimerState {
+  if (s.phase === "focus") return start(s, now);
+  return start(reset(s), now);
+}
+
+/** Esc: clean slate, keeping only the chosen preset. */
+export function startFresh(s: TimerState): TimerState {
+  return reset({ ...s, intention: "", note: "" });
+}
+
+/** "just now", "14m", "2h 14m", "3d". */
+export function formatAgo(ms: number): string {
+  const min = Math.floor(Math.max(0, ms) / 60_000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min}m ago`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return min % 60 ? `${h}h ${min % 60}m ago` : `${h}h ago`;
+  const d = Math.floor(h / 24);
+  return d === 1 ? "yesterday" : `${d}d ago`;
 }
 
 export function setIntention(s: TimerState, text: string): TimerState {
@@ -248,5 +317,7 @@ export function parseTimer(raw: unknown): TimerState | null {
     ...(s as TimerState),
     note: typeof s.note === "string" ? s.note : "",
     notePrompt: prompts.includes(s.notePrompt as NotePrompt) ? (s.notePrompt as NotePrompt) : null,
+    focusedMs: typeof s.focusedMs === "number" ? s.focusedMs : 0,
+    leftAt: typeof s.leftAt === "number" ? s.leftAt : null,
   };
 }

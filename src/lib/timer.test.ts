@@ -3,7 +3,11 @@ import {
   EXTENSION_MS,
   createTimer,
   extend,
+  formatAgo,
   formatClock,
+  resumeSession,
+  shouldOfferResume,
+  startFresh,
   dismissNote,
   parseTimer,
   pause,
@@ -141,7 +145,7 @@ describe("intention and \"Where was I?\" notes", () => {
   it("opens the board on pause, stop and when focus ends", () => {
     const s = start(createTimer("25-5"), T0);
     expect(pause(s, T0 + MIN).notePrompt).toBe("pause");
-    expect(stop(s).notePrompt).toBe("stop");
+    expect(stop(s, T0 + MIN).notePrompt).toBe("stop");
     expect(tick(s, T0 + 26 * MIN).notePrompt).toBe("end");
   });
 
@@ -168,7 +172,7 @@ describe("intention and \"Where was I?\" notes", () => {
 
   it("stop keeps intention and note for the next session", () => {
     let s = setIntention(createTimer(), "Fix token refresh");
-    s = saveNote(stop(start(s, T0)), "write the test");
+    s = saveNote(stop(start(s, T0), T0 + MIN), "write the test");
     const next = start(s, T0 + 10 * MIN);
     expect(next.phase).toBe("focus");
     expect(next.intention).toBe("Fix token refresh");
@@ -182,5 +186,69 @@ describe("intention and \"Where was I?\" notes", () => {
     const parsed = parseTimer(old);
     expect(parsed?.note).toBe("");
     expect(parsed?.notePrompt).toBeNull();
+  });
+});
+
+describe("resume card", () => {
+  const withIntention = setIntention(createTimer("50-10"), "Fix token refresh");
+
+  it("is offered for a paused or stopped session with an intention", () => {
+    const running = start(withIntention, T0);
+    expect(shouldOfferResume(running)).toBe(false); // a plain reload: just carry on
+    expect(shouldOfferResume(pause(running, T0 + 38 * MIN))).toBe(true);
+    expect(shouldOfferResume(stop(running, T0 + 38 * MIN))).toBe(true);
+    expect(shouldOfferResume(tick(running, T0 + 3 * 60 * MIN))).toBe(true); // came back hours later
+  });
+
+  it("is not offered without an intention or before anything started", () => {
+    expect(shouldOfferResume(withIntention)).toBe(false);
+    expect(shouldOfferResume(pause(start(createTimer(), T0), T0 + MIN))).toBe(false);
+  });
+
+  it("remembers how far you got and when you left", () => {
+    const paused = pause(start(withIntention, T0), T0 + 38 * MIN);
+    expect(paused.focusedMs).toBe(38 * MIN);
+    expect(paused.leftAt).toBe(T0 + 38 * MIN);
+
+    const ended = tick(start(withIntention, T0), T0 + 70 * MIN);
+    expect(ended.focusedMs).toBe(50 * MIN);
+    expect(ended.leftAt).toBe(T0 + 50 * MIN); // when focus ended, not when the break did
+  });
+
+  it("R continues a paused focus block exactly where it was", () => {
+    const paused = pause(start(withIntention, T0), T0 + 38 * MIN);
+    const later = T0 + 3 * 60 * MIN;
+    const resumed = resumeSession(paused, later);
+    expect(resumed.phase).toBe("focus");
+    expect(remaining(resumed, later)).toBe(12 * MIN);
+  });
+
+  it("R after a finished or stopped session starts a new one with the same context", () => {
+    const stopped = saveNote(stop(start(withIntention, T0), T0 + 20 * MIN), "write the test");
+    const resumed = resumeSession(stopped, T0 + 60 * MIN);
+    expect(resumed.phase).toBe("focus");
+    expect(remaining(resumed, T0 + 60 * MIN)).toBe(50 * MIN);
+    expect(resumed.intention).toBe("Fix token refresh");
+    expect(resumed.note).toBe("write the test");
+    expect(resumed.focusedMs).toBe(0);
+  });
+
+  it("Esc starts fresh: no intention, no note, same preset", () => {
+    const s = saveNote(stop(start(createTimer("25-5"), T0), T0 + MIN), "x");
+    const fresh = startFresh(setIntention(s, "y"));
+    expect(fresh.phase).toBe("idle");
+    expect(fresh.intention).toBe("");
+    expect(fresh.note).toBe("");
+    expect(fresh.focusMs).toBe(25 * MIN);
+    expect(shouldOfferResume(fresh)).toBe(false);
+  });
+
+  it("formats time away", () => {
+    expect(formatAgo(20_000)).toBe("just now");
+    expect(formatAgo(14 * MIN)).toBe("14m ago");
+    expect(formatAgo(134 * MIN)).toBe("2h 14m ago");
+    expect(formatAgo(120 * MIN)).toBe("2h ago");
+    expect(formatAgo(30 * 60 * MIN)).toBe("yesterday");
+    expect(formatAgo(80 * 60 * MIN)).toBe("3d ago");
   });
 });

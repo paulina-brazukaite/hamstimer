@@ -28,6 +28,7 @@ src/
     globals.css     design tokens (dark default + warm light)
     page.tsx        "/" (renders the focus screen)
   components/       UI pieces ("use client" where they need the browser)
+                    focus-screen.tsx is "/": resume card or timer view
   lib/
     storage.ts      safe localStorage wrapper (never throws)
     timer.ts        timer engine: pure functions over timestamps (+ timer.test.ts)
