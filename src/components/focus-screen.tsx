@@ -9,6 +9,7 @@ import { ResumeCard } from "@/components/resume-card";
 import { getSnapshot, update } from "@/lib/timer-store";
 import { SiteFooter } from "@/components/site-footer";
 import { UndoToast } from "@/components/undo-toast";
+import { leadClass } from "@/components/lead";
 import { useTimer } from "@/lib/use-timer";
 import { useModKey } from "@/lib/use-stored";
 import {
@@ -101,13 +102,27 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
           // `key` remounts the input (fresh defaultValue + autofocus) when a session ends.
           <IntentionInput key={state.sessionStartedAt ?? 0} value={state.intention} />
         ) : (
-          <p className="max-w-xl text-center text-[17px] text-muted">
+          // The lead line: what you're doing. On break it steps back so the break reads as rest.
+          <p
+            className={
+              phase === "break"
+                ? "max-w-xl text-center text-[17px] text-balance break-words text-muted"
+                : `max-w-xl text-center ${leadClass(label)}`
+            }
+          >
             {phase === "break" ? `Break · ${label}` : label}
           </p>
         )}
 
+        {/* Right under what you're doing: the next step. */}
+        {!state.notePrompt && <NextNote note={state.note} />}
+
+        {/* The clock is the frame, not the subject: lighter, smaller, and only at full
+            strength while it's actually running (so paused looks paused). */}
         <p
-          className="font-mono text-7xl leading-none tracking-tighter tabular-nums sm:text-[136px]"
+          className={`mt-3 font-mono text-6xl leading-none font-light tracking-tighter tabular-nums sm:text-[88px] ${
+            running ? "text-fg" : "text-muted"
+          }`}
           role="timer"
           aria-live="off"
         >
@@ -130,11 +145,7 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
           {phase === "complete" && "Session over. Nice work."}
         </p>
 
-        {state.notePrompt ? (
-          <NoteBoard prompt={state.notePrompt} previous={state.note} />
-        ) : (
-          <NextNote note={state.note} />
-        )}
+        {state.notePrompt && <NoteBoard prompt={state.notePrompt} previous={state.note} />}
 
         {showIntentionInput && <PresetPicker state={state} />}
 

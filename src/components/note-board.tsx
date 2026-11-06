@@ -62,8 +62,8 @@ export function NoteBoard({ prompt, previous }: { prompt: NotePrompt; previous: 
 export function NextNote({ note }: { note: string }) {
   if (!note) return null;
   return (
-    <p className="max-w-xl text-center text-[15px] text-muted">
-      <span className="mr-2 font-mono text-xs text-lamp">↳ next</span>
+    <p className="max-w-xl text-center text-[17px] leading-snug text-pretty break-words text-muted">
+      <span className="mr-1 font-mono text-xs text-lamp">↳ next</span>{" "}
       {note}
     </p>
   );

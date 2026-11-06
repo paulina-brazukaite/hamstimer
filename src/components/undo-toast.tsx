@@ -20,8 +20,8 @@ export function UndoToast({ visible }: { visible: boolean }) {
     function onKey(e: KeyboardEvent) {
       if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || e.key.toLowerCase() !== "z") return;
       const t = e.target as HTMLElement | null;
-      if (t instanceof HTMLInputElement && t.value !== "") return;
-      if (t instanceof HTMLTextAreaElement || t?.isContentEditable) return;
+      if ((t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) && t.value !== "") return;
+      if (t?.isContentEditable) return;
       e.preventDefault();
       undoStartFresh();
     }

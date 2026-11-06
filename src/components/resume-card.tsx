@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { startFreshUndoable, update } from "@/lib/timer-store";
 import { formatAgo, resumeSession, type TimerState } from "@/lib/timer";
+import { leadClass } from "@/components/lead";
 
 const MIN = 60_000;
 
@@ -35,25 +36,29 @@ export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
   return (
     <section
       role="dialog"
-      aria-labelledby="resume-intention"
+      aria-labelledby="resume-lead"
       className="animate-rise-in w-full max-w-lg rounded-2xl border border-line bg-surface p-7 shadow-card sm:p-9"
     >
       <p className="font-mono text-xs text-faint">
         Where you left off{ago && <> · {ago}</>}
       </p>
 
-      <h1
-        id="resume-intention"
-        className="mt-4 text-2xl leading-snug font-semibold tracking-tight text-balance text-fg sm:text-[28px]"
-      >
-        {state.intention}
-      </h1>
-
-      {state.note && (
-        <p className="mt-3 text-[17px] leading-relaxed text-muted">
-          <span className="mr-2 font-mono text-xs text-lamp">↳ next</span>
-          {state.note}
-        </p>
+      {/* The next step leads: it's what you act on. The intention says what it's part of. */}
+      {state.note ? (
+        <>
+          <p className="mt-4 text-[15px] leading-snug text-pretty text-muted">{state.intention}</p>
+          {/* "pretty", not "balance": balancing around the inline label leaves a short first line. */}
+          <h1 id="resume-lead" className={`mt-2 ${leadClass(state.note, "pretty")}`}>
+            <span className="mr-1 align-[0.2em] font-mono text-sm font-normal tracking-normal text-lamp">
+              ↳ next
+            </span>{" "}
+            {state.note}
+          </h1>
+        </>
+      ) : (
+        <h1 id="resume-lead" className={`mt-4 ${leadClass(state.intention)}`}>
+          {state.intention}
+        </h1>
       )}
 
       <div className="mt-7">
@@ -61,7 +66,7 @@ export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
           <div className="h-0.5 rounded-full bg-lamp" style={{ width: `${share * 100}%` }} />
         </div>
         <p className="mt-2.5 font-mono text-xs text-faint tabular-nums">
-          {focusedMin} of {targetMin} min
+          {focusedMin < 1 ? "<1" : focusedMin} of {targetMin} min
         </p>
       </div>
 

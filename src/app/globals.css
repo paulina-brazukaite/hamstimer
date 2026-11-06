@@ -57,6 +57,12 @@ body {
   color: var(--fg);
 }
 
+/* Text selection from the palette, not the browser's blue (amber stays reserved). */
+::selection {
+  background: color-mix(in srgb, var(--fg) 22%, transparent);
+  color: var(--fg);
+}
+
 /* The one animation in the product: the resume card arriving. */
 @keyframes rise-in {
   from {
