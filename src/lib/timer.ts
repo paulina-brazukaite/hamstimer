@@ -42,8 +42,18 @@ export interface TimerState {
   elapsedMs: number;
   extensions: number;
   sessionStartedAt: number | null;
+  /** One line: what this session is for. */
   intention: string;
+  /** The latest "Where was I?" note, i.e. the next step. */
+  note: string;
+  /** Why the "Where was I?" board is open, or null when it's closed. */
+  notePrompt: NotePrompt | null;
 }
+
+export type NotePrompt = "pause" | "stop" | "end";
+
+export const MAX_INTENTION = 120;
+export const MAX_NOTE = 200;
 
 export function createTimer(presetId: PresetId = DEFAULT_PRESET, focusMin?: number, breakMin?: number): TimerState {
   const preset = PRESETS.find((p) => p.id === presetId);
@@ -60,6 +70,8 @@ export function createTimer(presetId: PresetId = DEFAULT_PRESET, focusMin?: numb
     extensions: 0,
     sessionStartedAt: null,
     intention: "",
+    note: "",
+    notePrompt: null,
   };
 }
 
@@ -122,9 +134,10 @@ export function tick(s: TimerState, now: number): TimerState {
     const endsAt = next.startedAt + (length - next.elapsedMs);
     if (now < endsAt) break;
 
+    // Focus ending is the "session end" moment: ask where you were while it's fresh.
     next =
       next.phase === "focus"
-        ? { ...next, phase: "break", elapsedMs: 0, startedAt: endsAt }
+        ? { ...next, phase: "break", elapsedMs: 0, startedAt: endsAt, notePrompt: "end" }
         : { ...next, phase: "complete", elapsedMs: 0, startedAt: null };
   }
   return next;
@@ -134,15 +147,41 @@ export function tick(s: TimerState, now: number): TimerState {
 export function start(s: TimerState, now: number): TimerState {
   if (s.phase === "idle" || s.phase === "complete") {
     const fresh = s.phase === "complete" ? reset(s) : s;
-    return { ...fresh, phase: "focus", startedAt: now, elapsedMs: 0, sessionStartedAt: now };
+    return { ...fresh, phase: "focus", startedAt: now, elapsedMs: 0, sessionStartedAt: now, notePrompt: null };
   }
   if (s.startedAt !== null) return s; // already running
-  return { ...s, startedAt: now };
+  return { ...s, startedAt: now, notePrompt: null };
 }
 
+/** Pausing opens the "Where was I?" board. */
 export function pause(s: TimerState, now: number): TimerState {
   if (!isRunning(s)) return s;
-  return { ...s, elapsedMs: phaseElapsed(s, now), startedAt: null };
+  return { ...s, elapsedMs: phaseElapsed(s, now), startedAt: null, notePrompt: "pause" };
+}
+
+/** End the session early. Keeps intention and note, and asks "Where was I?". */
+export function stop(s: TimerState): TimerState {
+  if (s.phase !== "focus" && s.phase !== "break") return s;
+  return { ...s, phase: "complete", startedAt: null, elapsedMs: 0, notePrompt: "stop" };
+}
+
+export function setIntention(s: TimerState, text: string): TimerState {
+  return { ...s, intention: oneLine(text, MAX_INTENTION) };
+}
+
+/** Enter on the board. An empty note keeps the previous one. */
+export function saveNote(s: TimerState, text: string): TimerState {
+  const note = oneLine(text, MAX_NOTE);
+  return { ...s, note: note || s.note, notePrompt: null };
+}
+
+/** Esc on the board. */
+export function dismissNote(s: TimerState): TimerState {
+  return s.notePrompt === null ? s : { ...s, notePrompt: null };
+}
+
+function oneLine(text: string, max: number): string {
+  return text.replace(/\s+/g, " ").trim().slice(0, max);
 }
 
 /** What Space does. */
@@ -167,6 +206,7 @@ export function extend(s: TimerState, now: number): TimerState {
       focusMs: s.focusMs + EXTENSION_MS, // …and now has 15 more minutes
       startedAt: now,
       extensions: s.extensions + 1,
+      notePrompt: null, // kept going, so no need to write down where you were
     };
   }
   return s;
@@ -175,13 +215,13 @@ export function extend(s: TimerState, now: number): TimerState {
 /** Back to idle with the same preset and durations (extensions dropped). */
 export function reset(s: TimerState): TimerState {
   const base = createTimer(s.presetId, (s.focusMs - s.extensions * EXTENSION_MS) / MINUTE, s.breakMs / MINUTE);
-  return { ...base, intention: s.intention };
+  return { ...base, intention: s.intention, note: s.note };
 }
 
 /** Only allowed while idle or complete; mid-session changes would be confusing. */
 export function choosePreset(s: TimerState, presetId: PresetId, focusMin?: number, breakMin?: number): TimerState {
   if (s.phase === "focus" || s.phase === "break") return s;
-  return { ...createTimer(presetId, focusMin, breakMin), intention: s.intention };
+  return { ...createTimer(presetId, focusMin, breakMin), intention: s.intention, note: s.note };
 }
 
 // ---- Persistence -------------------------------------------------------------
@@ -201,5 +241,12 @@ export function parseTimer(raw: unknown): TimerState | null {
     typeof s.elapsedMs === "number" &&
     typeof s.extensions === "number" &&
     typeof s.intention === "string";
-  return ok ? (s as TimerState) : null;
+  if (!ok) return null;
+  // Fields added after the first release get defaults, so old saves still load.
+  const prompts: NotePrompt[] = ["pause", "stop", "end"];
+  return {
+    ...(s as TimerState),
+    note: typeof s.note === "string" ? s.note : "",
+    notePrompt: prompts.includes(s.notePrompt as NotePrompt) ? (s.notePrompt as NotePrompt) : null,
+  };
 }

@@ -26,7 +26,7 @@ src/
   app/
     layout.tsx      fonts, metadata, theme-before-paint script
     globals.css     design tokens (dark default + warm light)
-    page.tsx        "/" (the app itself)
+    page.tsx        "/" (renders the focus screen)
   components/       UI pieces ("use client" where they need the browser)
   lib/
     storage.ts      safe localStorage wrapper (never throws)

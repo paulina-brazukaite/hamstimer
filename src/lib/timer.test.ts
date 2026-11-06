@@ -4,8 +4,12 @@ import {
   createTimer,
   extend,
   formatClock,
+  dismissNote,
   parseTimer,
   pause,
+  saveNote,
+  setIntention,
+  stop,
   remaining,
   start,
   tick,
@@ -130,5 +134,53 @@ describe("helpers", () => {
     expect(parseTimer(null)).toBeNull();
     expect(parseTimer({ version: 2 })).toBeNull();
     expect(parseTimer("hello")).toBeNull();
+  });
+});
+
+describe("intention and \"Where was I?\" notes", () => {
+  it("opens the board on pause, stop and when focus ends", () => {
+    const s = start(createTimer("25-5"), T0);
+    expect(pause(s, T0 + MIN).notePrompt).toBe("pause");
+    expect(stop(s).notePrompt).toBe("stop");
+    expect(tick(s, T0 + 26 * MIN).notePrompt).toBe("end");
+  });
+
+  it("resuming or extending closes the board", () => {
+    const paused = pause(start(createTimer(), T0), T0 + MIN);
+    expect(start(paused, T0 + 2 * MIN).notePrompt).toBeNull();
+    const onBreak = tick(start(createTimer("25-5"), T0), T0 + 26 * MIN);
+    expect(extend(onBreak, T0 + 26 * MIN).notePrompt).toBeNull();
+  });
+
+  it("Enter saves a one-line note, empty keeps the old one, Esc skips", () => {
+    let s = pause(start(createTimer(), T0), T0 + MIN);
+    s = saveNote(s, "  check   refresh\ntoken expiry ");
+    expect(s.note).toBe("check refresh token expiry");
+    expect(s.notePrompt).toBeNull();
+
+    s = saveNote(pause(start(s, T0 + 2 * MIN), T0 + 3 * MIN), "   ");
+    expect(s.note).toBe("check refresh token expiry");
+
+    const skipped = dismissNote(pause(start(s, T0 + 4 * MIN), T0 + 5 * MIN));
+    expect(skipped.notePrompt).toBeNull();
+    expect(skipped.note).toBe("check refresh token expiry");
+  });
+
+  it("stop keeps intention and note for the next session", () => {
+    let s = setIntention(createTimer(), "Fix token refresh");
+    s = saveNote(stop(start(s, T0)), "write the test");
+    const next = start(s, T0 + 10 * MIN);
+    expect(next.phase).toBe("focus");
+    expect(next.intention).toBe("Fix token refresh");
+    expect(next.note).toBe("write the test");
+  });
+
+  it("loads saves from before notes existed", () => {
+    const old: Record<string, unknown> = { ...createTimer() };
+    delete old.note;
+    delete old.notePrompt;
+    const parsed = parseTimer(old);
+    expect(parsed?.note).toBe("");
+    expect(parsed?.notePrompt).toBeNull();
   });
 });

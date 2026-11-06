@@ -13,9 +13,11 @@ import {
   phaseLength,
   progress,
   remaining,
-  reset,
+  stop,
   toggle,
 } from "@/lib/timer";
+import { IntentionInput } from "@/components/intention-input";
+import { NextNote, NoteBoard } from "@/components/note-board";
 
 const DEFAULT_TITLE = "Nextline · focus timer";
 
@@ -59,6 +61,7 @@ export function FocusScreen() {
   }, []);
 
   const active = phase === "focus" || phase === "break";
+  const showIntentionInput = state && !state.notePrompt && (phase === "idle" || phase === "complete");
   const pct = state ? Math.round(progress(state, now) * 1000) / 10 : 0;
 
   return (
@@ -79,16 +82,21 @@ export function FocusScreen() {
       <main
         className={`flex flex-1 flex-col items-center justify-center gap-5 px-6 py-10 ${state ? "" : "invisible"}`}
       >
-        <p className="max-w-xl text-center text-[17px] text-muted">
-          {phase === "break" ? "Break" : phase === "complete" ? "Session complete" : label}
-        </p>
+        {showIntentionInput ? (
+          // `key` remounts the input (fresh defaultValue + autofocus) when a session ends.
+          <IntentionInput key={state.sessionStartedAt ?? 0} value={state.intention} />
+        ) : (
+          <p className="max-w-xl text-center text-[17px] text-muted">
+            {phase === "break" ? `Break · ${label}` : label}
+          </p>
+        )}
 
         <p
           className="font-mono text-7xl leading-none tracking-tighter tabular-nums sm:text-[136px]"
           role="timer"
           aria-live="off"
         >
-          {phase === "complete" ? "00:00" : clock}
+          {clock}
         </p>
 
         <p className="min-h-5 font-mono text-[13px] text-faint">
@@ -104,10 +112,18 @@ export function FocusScreen() {
               {formatClock(state.breakMs)} break{!running && " · paused"} · E for 15 more minutes
             </>
           )}
-          {state && phase === "complete" && "Nice work."}
+          {state && phase === "complete" && "Session over. Nice work."}
         </p>
 
-        {state && (phase === "idle" || phase === "complete") && <PresetPicker state={state} />}
+        {state?.notePrompt ? (
+          <NoteBoard prompt={state.notePrompt} previous={state.note} />
+        ) : (
+          <NextNote note={state?.note ?? ""} />
+        )}
+
+        {state && !state.notePrompt && (phase === "idle" || phase === "complete") && (
+          <PresetPicker state={state} />
+        )}
 
         <div className="flex gap-3">
           <button
@@ -120,7 +136,7 @@ export function FocusScreen() {
           {active && (
             <button
               type="button"
-              onClick={() => update(reset)}
+              onClick={() => update(stop)}
               className="min-h-10 rounded-lg px-4 text-sm text-muted transition-colors hover:text-fg"
             >
               Stop
@@ -130,9 +146,16 @@ export function FocusScreen() {
       </main>
 
       <footer className="flex flex-wrap justify-center gap-7 px-6 pb-8 font-mono text-xs text-faint">
-        <span>
-          <span className="text-fg">Space</span> {running ? "pause" : "start"}
-        </span>
+        {showIntentionInput && (
+          <span>
+            <span className="text-fg">Enter</span> start
+          </span>
+        )}
+        {active && !state?.notePrompt && (
+          <span>
+            <span className="text-fg">Space</span> {running ? "pause" : "resume"}
+          </span>
+        )}
         {active && (
           <span>
             <span className="text-fg">E</span> +15 min
