@@ -1,26 +1,76 @@
 @import "tailwindcss";
 
+/*
+  Design tokens (from the "visual direction v1" canvas).
+  Dark is the default; [data-theme="light"] on <html> switches to warm light.
+  Components use semantic Tailwind classes like bg-ground, text-muted, bg-lamp,
+  so the theme swap is just these variables changing.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ground: #0f1012;
+  --surface: #17191c;
+  --well: #0f1012;
+  --line: #2b2f35;
+  --line-soft: #23262b;
+  --fg: #ece9e3;
+  --muted: #9a9ea6;
+  --faint: #7d828a;
+  --lamp: #e9a84c;
+  --lamp-fg: #1a1408;
+  --shadow: 0 24px 60px rgb(0 0 0 / 0.35);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --ground: #f5f1e8;
+  --surface: #fffdf8;
+  --well: #f5f1e8;
+  --line: #ddd5c5;
+  --line-soft: #e8e1d3;
+  --fg: #1e1c19;
+  --muted: #65605a;
+  --faint: #65605a;
+  --lamp: #9a5a0c;
+  --lamp-fg: #fffdf8;
+  --shadow: 0 20px 50px rgb(80 60 30 / 0.1);
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-well: var(--well);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-lamp: var(--lamp);
+  --color-lamp-fg: var(--lamp-fg);
+  --shadow-card: var(--shadow);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  background: var(--ground);
+  color: var(--fg);
+}
+
+/* The one animation in the product: the resume card arriving. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: no-preference) {
+  .animate-rise-in {
+    animation: rise-in 240ms ease-out both;
+  }
 }

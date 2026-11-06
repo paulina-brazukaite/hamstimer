@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nextline
 
-## Getting Started
+A focus timer that remembers where your head was.
 
-First, run the development server:
+## Run it
+
+Requires Node 20+ (22 recommended).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Before pushing anything:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run lint
+npm run build      # must pass; this is what Vercel runs
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Where things live
 
-## Learn More
+```
+src/
+  app/
+    layout.tsx      fonts, metadata, theme-before-paint script
+    globals.css     design tokens (dark default + warm light)
+    page.tsx        "/" (the app itself)
+  components/       UI pieces ("use client" where they need the browser)
+  lib/
+    storage.ts      safe localStorage wrapper (never throws)
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Conventions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Colours:** use the semantic classes only (`bg-ground`, `bg-surface`, `border-line`, `text-fg`,
+  `text-muted`, `text-faint`, `bg-lamp`, `text-lamp-fg`). Never hard-code a hex in a component;
+  both themes come from the variables in `globals.css`.
+- **Amber (`lamp`)** is used in three places only: the progress line, the "next" label and the
+  Resume button.
+- **Storage:** always go through `lib/storage.ts`. Every key starts with `nextline:`.
+- **Next.js version:** this is Next 16. Read `node_modules/next/dist/docs/` before reaching for
+  an API from memory (see AGENTS.md).
