@@ -16,6 +16,7 @@ Before pushing anything:
 ```bash
 npm run lint
 npm run build      # must pass; this is what Vercel runs
+npm test           # unit tests (Vitest); npm run test:watch while coding
 ```
 
 ## Where things live
@@ -29,6 +30,9 @@ src/
   components/       UI pieces ("use client" where they need the browser)
   lib/
     storage.ts      safe localStorage wrapper (never throws)
+    timer.ts        timer engine: pure functions over timestamps (+ timer.test.ts)
+    timer-store.ts  engine + clock + localStorage, subscribable from React
+    use-timer.ts    React hook over the store (useSyncExternalStore)
 ```
 
 ## Conventions

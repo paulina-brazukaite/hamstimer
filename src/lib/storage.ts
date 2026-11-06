@@ -30,4 +30,5 @@ export function remove(key: string): void {
 // All keys live under one prefix so export/import and "reset" are easy later.
 export const KEYS = {
   theme: "nextline:theme",
+  timer: "nextline:timer",
 } as const;
