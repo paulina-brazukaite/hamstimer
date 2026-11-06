@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
-import { update } from "@/lib/timer-store";
-import { formatAgo, resumeSession, startFresh, type TimerState } from "@/lib/timer";
+import { startFreshUndoable, update } from "@/lib/timer-store";
+import { formatAgo, resumeSession, type TimerState } from "@/lib/timer";
 
 const MIN = 60_000;
 
 /**
  * The first thing you see when you come back to an unfinished session.
- * R resumes, Esc starts fresh. The only animated element in the product.
+ * R resumes, Esc starts fresh (undoable for a few seconds). The only animated element in the product.
  */
 export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
   useEffect(() => {
@@ -20,7 +20,7 @@ export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
         update(resumeSession);
       } else if (e.key === "Escape") {
         e.preventDefault();
-        update(startFresh);
+        startFreshUndoable();
       }
     }
     window.addEventListener("keydown", onKey);
@@ -77,7 +77,7 @@ export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
         </button>
         <button
           type="button"
-          onClick={() => update(startFresh)}
+          onClick={startFreshUndoable}
           className="inline-flex min-h-11 items-center gap-3 rounded-lg px-4 text-[15px] text-muted transition-colors hover:text-fg"
         >
           Start fresh

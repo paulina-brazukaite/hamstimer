@@ -8,6 +8,7 @@ import { NextNote, NoteBoard } from "@/components/note-board";
 import { ResumeCard } from "@/components/resume-card";
 import { getSnapshot, update } from "@/lib/timer-store";
 import { SiteFooter } from "@/components/site-footer";
+import { UndoToast } from "@/components/undo-toast";
 import { useTimer } from "@/lib/use-timer";
 import { useModKey } from "@/lib/use-stored";
 import {
@@ -75,6 +76,7 @@ export function FocusScreen({ preset, intro }: { preset?: PresetId; intro?: Reac
         )}
       </main>
     </div>
+    <UndoToast visible={snap?.undoUntil != null} />
     <SiteFooter />
     </>
   );

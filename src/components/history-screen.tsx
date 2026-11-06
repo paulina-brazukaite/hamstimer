@@ -56,7 +56,8 @@ export function HistoryScreen() {
 
         {raw === undefined ? null : entries.length === 0 ? (
           <p className="mt-10 text-muted">
-            No sessions yet. Once you&apos;ve focused for a minute and paused, stopped or finished, it shows up here.
+            No sessions yet. Once you&apos;ve focused for a minute (or left a note) and paused, stopped or finished,
+            it shows up here.
           </p>
         ) : (
           <ol className="mt-6 border-t border-line-soft">

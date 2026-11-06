@@ -20,9 +20,14 @@ const MAX_ENTRIES = 1000;
  * Insert or update the entry for the timer's current session. Called whenever
  * the timer is saved; returns the same array when there's nothing to change,
  * so the caller can skip writing.
+ *
+ * Short sessions are skipped as accidental, unless they have a note: a written
+ * next step is never an accident, and keeping it here means "Start fresh" can't
+ * make it disappear for good.
  */
 export function recordSession(history: HistoryEntry[], s: TimerState): HistoryEntry[] {
-  if (s.sessionStartedAt === null || s.leftAt === null || s.focusedMs < MIN_RECORDED_MS) return history;
+  if (s.sessionStartedAt === null || s.leftAt === null) return history;
+  if (s.focusedMs < MIN_RECORDED_MS && !s.note) return history;
 
   const entry: HistoryEntry = {
     id: s.sessionStartedAt,

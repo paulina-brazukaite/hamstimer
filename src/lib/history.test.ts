@@ -13,6 +13,13 @@ describe("recording sessions", () => {
     expect(recordSession([], pause(start(s0, T0), T0 + 30_000))).toEqual([]);
   });
 
+  it("keeps a short session once it has a note, so starting fresh can't lose it", () => {
+    const s = saveNote(pause(start(s0, T0), T0 + 30_000), "check the retry header");
+    const h = recordSession([], s);
+    expect(h).toHaveLength(1);
+    expect(h[0]).toMatchObject({ id: T0, note: "check the retry header", focusedMs: 30_000 });
+  });
+
   it("adds an entry on pause and updates the same entry later", () => {
     let s = pause(start(s0, T0), T0 + 20 * MIN);
     let h = recordSession([], s);

@@ -5,7 +5,7 @@
 // React's built-in way to subscribe to data that lives outside React.
 
 import { KEYS, readJSON, writeJSON } from "./storage";
-import { createTimer, parseTimer, shouldOfferResume, tick, type TimerState } from "./timer";
+import { createTimer, parseTimer, shouldOfferResume, startFresh, tick, type TimerState } from "./timer";
 import { parseHistory, recordSession } from "./history";
 
 export interface TimerSnapshot {
@@ -13,9 +13,16 @@ export interface TimerSnapshot {
   now: number;
   /** Show the resume card. Decided once per page load; any action closes it. */
   resume: boolean;
+  /** "Start fresh" can be undone until this time (ms), or null when there's nothing to undo. */
+  undoUntil: number | null;
 }
 
+/** How long "Started fresh · Undo" stays up. */
+export const UNDO_MS = 10_000;
+
 let snapshot: TimerSnapshot | null = null; // null until loaded in the browser
+/** The session that "Start fresh" cleared, kept in memory so it can be put back. */
+let beforeFresh: TimerState | null = null;
 const listeners = new Set<() => void>();
 let stopClock: (() => void) | null = null;
 const focusEndListeners = new Set<(s: TimerState) => void>();
@@ -25,7 +32,7 @@ function load(): TimerSnapshot {
   const saved = parseTimer(readJSON<unknown>(KEYS.timer, null));
   const state = tick(saved ?? createTimer(), now);
   if (state !== saved) saveTimer(state);
-  return { state, now, resume: shouldOfferResume(state) };
+  return { state, now, resume: shouldOfferResume(state), undoUntil: null };
 }
 
 /** Save the timer, and keep this session's history entry up to date. */
@@ -51,7 +58,9 @@ function refresh() {
     state.phase !== "focus" &&
     state.leftAt !== null &&
     now - state.leftAt < 2 * 60_000; // not after the laptop slept for an hour
-  snapshot = { ...snapshot, state, now };
+  const undoUntil = snapshot.undoUntil !== null && now < snapshot.undoUntil ? snapshot.undoUntil : null;
+  if (undoUntil === null) beforeFresh = null;
+  snapshot = { ...snapshot, state, now, undoUntil };
   emit();
   if (focusJustEnded) focusEndListeners.forEach((l) => l(state));
 }
@@ -88,6 +97,7 @@ function onVisible() {
 /** Another tab changed the timer: pick up its version. */
 function onStorage(e: StorageEvent) {
   if (e.key !== KEYS.timer) return;
+  beforeFresh = null; // the other tab's version wins; don't offer to undo over it
   snapshot = { ...load(), resume: snapshot?.resume ?? false };
   emit();
 }
@@ -132,7 +142,34 @@ export function update(action: (s: TimerState, now: number) => TimerState) {
   const state = action(tick(snapshot.state, now), now);
   saveTimer(state);
   if (state.phase === "focus") markOnboarded();
-  snapshot = { state, now, resume: false };
+  beforeFresh = null; // any other action ends the chance to undo
+  snapshot = { state, now, resume: false, undoUntil: null };
+  emit();
+}
+
+/**
+ * "Start fresh" (Esc on the resume card, or the menu). Clears the intention and
+ * note, but keeps the old session for UNDO_MS so one stray Esc can be taken back.
+ * (A session with a note is also in History; see recordSession.)
+ */
+export function startFreshUndoable() {
+  snapshot ??= load();
+  const before = tick(snapshot.state, Date.now());
+  update(startFresh);
+  if (!before.intention && !before.note) return; // nothing worth bringing back
+  beforeFresh = before;
+  snapshot = { ...snapshot!, undoUntil: snapshot!.now + UNDO_MS };
+  emit();
+}
+
+/** Put back the session "Start fresh" cleared, on its resume card. */
+export function undoStartFresh() {
+  if (!snapshot || !beforeFresh || snapshot.undoUntil === null) return;
+  const now = Date.now();
+  const state = tick(beforeFresh, now);
+  beforeFresh = null;
+  saveTimer(state);
+  snapshot = { state, now, resume: shouldOfferResume(state), undoUntil: null };
   emit();
 }
 

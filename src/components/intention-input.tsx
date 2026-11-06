@@ -28,6 +28,10 @@ export function IntentionInput({ value }: { value: string }) {
       }}
       onBlur={(e) => {
         const text = e.currentTarget.value;
+        // Only save a real edit. Blur also fires when the input disappears (e.g. Undo
+        // brings the resume card back), and saving the stale text then would
+        // overwrite the session that just came back.
+        if (text === value) return;
         update((s) => setIntention(s, text));
       }}
       className="w-full max-w-xl border-b border-line bg-transparent pb-2 text-center text-[17px] text-fg outline-none placeholder:text-faint focus:border-faint"

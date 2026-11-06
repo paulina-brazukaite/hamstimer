@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { update } from "@/lib/timer-store";
+import { startFreshUndoable, update } from "@/lib/timer-store";
 import { useTimer } from "@/lib/use-timer";
 import { useSettings } from "@/lib/use-stored";
 import { setNotifications, updateSettings } from "@/lib/settings";
@@ -18,7 +18,6 @@ import {
   pause,
   resumeSession,
   start,
-  startFresh,
   stop,
 } from "@/lib/timer";
 
@@ -182,7 +181,7 @@ function useCommands(): Command[] {
   // Timer
   if (snap?.resume) {
     add("Timer", "Resume where you left off", () => update(resumeSession), "R");
-    add("Timer", "Start fresh", () => update(startFresh), "Esc");
+    add("Timer", "Start fresh", startFreshUndoable, "Esc");
   } else {
     if (!active) add("Timer", "Start session", () => {
         update(start);
