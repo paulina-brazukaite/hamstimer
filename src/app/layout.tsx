@@ -8,6 +8,7 @@ import { KEYS } from "@/lib/storage";
 import { InlineScript } from "@/components/inline-script";
 import { CommandMenu } from "@/components/command-menu";
 import { SessionAlerts } from "@/components/session-alerts";
+import { ServiceWorker } from "@/components/service-worker";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col bg-ground font-sans text-fg">
         {children}
         <SessionAlerts />
+        <ServiceWorker />
         {/* Suspense: the menu reads the URL (usePathname), which some pages only know at request time. */}
         <Suspense fallback={null}>
           <CommandMenu />

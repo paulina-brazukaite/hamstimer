@@ -28,6 +28,8 @@ src/
     globals.css     design tokens (dark default + warm light)
     page.tsx        "/" (renders the focus screen)
     history/        "/history": session list + JSON export/import
+    manifest.ts     PWA manifest (/manifest.webmanifest)
+    icon.svg, apple-icon.png   favicons (Next file conventions)
   components/       UI pieces ("use client" where they need the browser)
                     focus-screen.tsx is "/": resume card or timer view
   lib/
@@ -65,3 +67,12 @@ src/
 | N | timer | write a "Where was I?" note |
 | Enter / Esc | note board | save / skip |
 | R / Esc | resume card | resume / start fresh |
+
+## Offline / PWA
+
+- `public/sw.js` is a small hand-written service worker (no library). It precaches `/`, `/history`
+  and every JS/CSS/font file they use, so one online visit is enough to work offline.
+- It only registers in production builds. To test: `npm run build && npm start`, load the page,
+  stop the server, reload.
+- After changing what it caches, bump `VERSION` at the top of `sw.js`.
+- Icons: edit `scripts/generate-icons.mjs`, then run `node scripts/generate-icons.mjs`.
