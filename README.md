@@ -27,6 +27,7 @@ src/
     layout.tsx      fonts, metadata, theme-before-paint script
     globals.css     design tokens (dark default + warm light)
     page.tsx        "/" (renders the focus screen)
+    history/        "/history": session list + JSON export/import
   components/       UI pieces ("use client" where they need the browser)
                     focus-screen.tsx is "/": resume card or timer view
   lib/
@@ -34,6 +35,8 @@ src/
     timer.ts        timer engine: pure functions over timestamps (+ timer.test.ts)
     timer-store.ts  engine + clock + localStorage, subscribable from React
     use-timer.ts    React hook over the store (useSyncExternalStore)
+    history.ts      history entries + backup format (+ history.test.ts)
+    use-stored.ts   React hook: a localStorage key, kept live
 ```
 
 ## Conventions

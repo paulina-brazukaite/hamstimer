@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { AppHeader } from "@/components/app-header";
 import { PresetPicker } from "@/components/preset-picker";
 import { IntentionInput } from "@/components/intention-input";
 import { NextNote, NoteBoard } from "@/components/note-board";
@@ -41,13 +41,7 @@ export function FocusScreen() {
         <div className="h-0.5 bg-lamp transition-[width] duration-300" style={{ width: `${pct}%` }} />
       </div>
 
-      <header className="flex items-center justify-between gap-4 px-6 pt-6 sm:px-10">
-        <div className="flex items-center gap-2.5">
-          <span className="size-2 rounded-full bg-lamp" aria-hidden="true" />
-          <span className="text-[15px] font-semibold tracking-tight">Nextline</span>
-        </div>
-        <ThemeToggle />
-      </header>
+      <AppHeader links={[{ href: "/history", label: "History" }]} />
 
       {!state ? (
         // Before localStorage is read (server render + first client render) we show

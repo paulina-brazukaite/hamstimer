@@ -13,6 +13,8 @@ export function readJSON<T>(key: string, fallback: T): T {
 export function writeJSON(key: string, value: unknown): boolean {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
+    // The browser only fires "storage" in *other* tabs; this tells this tab too.
+    window.dispatchEvent(new Event(CHANGED));
     return true;
   } catch {
     return false;
@@ -22,13 +24,18 @@ export function writeJSON(key: string, value: unknown): boolean {
 export function remove(key: string): void {
   try {
     window.localStorage.removeItem(key);
+    window.dispatchEvent(new Event(CHANGED));
   } catch {
     // nothing to do
   }
 }
 
+/** Fired on window whenever this tab writes a nextline:* key. */
+export const CHANGED = "nextline:changed";
+
 // All keys live under one prefix so export/import and "reset" are easy later.
 export const KEYS = {
   theme: "nextline:theme",
   timer: "nextline:timer",
+  history: "nextline:history",
 } as const;

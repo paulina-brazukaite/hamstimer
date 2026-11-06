@@ -6,6 +6,7 @@
 
 import { KEYS, readJSON, writeJSON } from "./storage";
 import { createTimer, parseTimer, shouldOfferResume, tick, type TimerState } from "./timer";
+import { parseHistory, recordSession } from "./history";
 
 export interface TimerSnapshot {
   state: TimerState;
@@ -22,8 +23,16 @@ function load(): TimerSnapshot {
   const now = Date.now();
   const saved = parseTimer(readJSON<unknown>(KEYS.timer, null));
   const state = tick(saved ?? createTimer(), now);
-  if (state !== saved) writeJSON(KEYS.timer, state);
+  if (state !== saved) saveTimer(state);
   return { state, now, resume: shouldOfferResume(state) };
+}
+
+/** Save the timer, and keep this session's history entry up to date. */
+function saveTimer(state: TimerState) {
+  writeJSON(KEYS.timer, state);
+  const history = parseHistory(readJSON<unknown>(KEYS.history, []));
+  const next = recordSession(history, state);
+  if (next !== history) writeJSON(KEYS.history, next);
 }
 
 function emit() {
@@ -35,7 +44,7 @@ function refresh() {
   if (!snapshot) return;
   const now = Date.now();
   const state = tick(snapshot.state, now);
-  if (state !== snapshot.state) writeJSON(KEYS.timer, state);
+  if (state !== snapshot.state) saveTimer(state);
   snapshot = { ...snapshot, state, now };
   emit();
 }
@@ -89,7 +98,7 @@ export function update(action: (s: TimerState, now: number) => TimerState) {
   snapshot ??= load();
   const now = Date.now();
   const state = action(tick(snapshot.state, now), now);
-  writeJSON(KEYS.timer, state);
+  saveTimer(state);
   snapshot = { state, now, resume: false };
   emit();
 }
