@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { AppHeader } from "@/components/app-header";
-import { CustomLength } from "@/components/preset-picker";
+import { PresetPicker } from "@/components/preset-picker";
 import { ResumeCard } from "@/components/resume-card";
 import { TaskView, focusLineInput } from "@/components/task-view";
 import { finishTaskUndoable, getSnapshot, update } from "@/lib/timer-store";
@@ -12,7 +12,6 @@ import { useTimer } from "@/lib/use-timer";
 import { useModKey } from "@/lib/use-stored";
 import {
   EXTENSION_MS,
-  PRESETS,
   canStart,
   choosePreset,
   currentLine,
@@ -98,7 +97,6 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
   const current = currentLine(state);
   const startable = canStart(state);
   const mod = useModKey();
-  const presetLabel = PRESETS.find((p) => p.id === state.presetId)?.label;
 
   return (
     <>
@@ -131,12 +129,10 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
                 {formatClock(state.breakMs)} break{!running && " · paused"} · E for 15 more minutes
               </>
             )}
-            {phase === "idle" &&
-              (presetLabel ? `${presetLabel} · ${mod} K to change` : `${state.focusMs / 60_000} / ${state.breakMs / 60_000}`)}
             {phase === "complete" && (startable ? "Break over. Space for the next one." : "All done. Add a line, or finish the task.")}
           </p>
 
-          {state.presetId === "custom" && !active && <CustomLength state={state} />}
+          {!active && <PresetPicker state={state} />}
 
           {hasLines && (
             <div className="flex flex-wrap justify-center gap-3">

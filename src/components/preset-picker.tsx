@@ -1,13 +1,18 @@
 "use client";
 
 import { update } from "@/lib/timer-store";
-import { choosePreset, type TimerState } from "@/lib/timer";
+import { PRESETS, choosePreset, type TimerState } from "@/lib/timer";
+
+const chip = "min-h-9 rounded-lg border px-3 font-mono text-xs transition-colors";
+const on = "border-fg text-fg";
+const off = "border-line text-muted hover:text-fg";
 
 /**
- * Focus and break minutes for the "Custom…" length. The fixed presets live in
- * the command menu (and the /timer pages); this only shows once Custom is chosen.
+ * Focus / break length, under the clock while nothing is running. Changing it
+ * mid-block isn't allowed (choosePreset ignores it), so it hides then.
  */
-export function CustomLength({ state }: { state: TimerState }) {
+export function PresetPicker({ state }: { state: TimerState }) {
+  const isCustom = state.presetId === "custom";
   const focusMin = state.focusMs / 60_000;
   const breakMin = state.breakMs / 60_000;
 
@@ -16,9 +21,37 @@ export function CustomLength({ state }: { state: TimerState }) {
   }
 
   return (
-    <div className="flex items-center gap-3 font-mono text-xs text-muted">
-      <MinutesInput label="Focus" value={focusMin} max={240} onCommit={(f) => setCustom(f, breakMin)} />
-      <MinutesInput label="Break" value={breakMin} max={60} onCommit={(b) => setCustom(focusMin, b)} />
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-wrap justify-center gap-2" role="radiogroup" aria-label="Focus and break length">
+        {PRESETS.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            role="radio"
+            aria-checked={state.presetId === p.id}
+            onClick={() => update((s) => choosePreset(s, p.id))}
+            className={`${chip} ${state.presetId === p.id ? on : off}`}
+          >
+            {p.label}
+          </button>
+        ))}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={isCustom}
+          onClick={() => setCustom(focusMin, breakMin)}
+          className={`${chip} ${isCustom ? on : off}`}
+        >
+          Custom
+        </button>
+      </div>
+
+      {isCustom && (
+        <div className="flex items-center gap-3 font-mono text-xs text-muted">
+          <MinutesInput label="Focus" value={focusMin} max={240} onCommit={(f) => setCustom(f, breakMin)} />
+          <MinutesInput label="Break" value={breakMin} max={60} onCommit={(b) => setCustom(focusMin, b)} />
+        </div>
+      )}
     </div>
   );
 }

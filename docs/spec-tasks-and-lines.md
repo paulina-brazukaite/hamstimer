@@ -110,7 +110,7 @@ Timer (one, global, as today)
 
 **10. Removed**
 - [ ] Intention input, note board and the separate "next" note are removed.
-- [ ] The preset picker leaves the focus screen. The preset becomes a setting (command menu); `/timer/[preset]` pages still set it.
+- [ ] The preset picker stays under the clock, but only while no focus block or break is running. `/timer/[preset]` pages and the command menu still set it.
 
 ### P1: soon after
 
