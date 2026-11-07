@@ -6,7 +6,7 @@ import type { HamsterPose } from "@/lib/hamster";
 import type { HamsterStageApi } from "@/lib/hamster3d/stage";
 
 /**
- * The hamster above the task: the 3D clay hamster when WebGL is available,
+ * The hamster above the task: the 3D hand-painted hamster when WebGL is available,
  * the flat drawing otherwise (and while three.js is still loading).
  *
  * Decoration only: hidden from screen readers, not clickable, and a fixed box,
@@ -28,9 +28,9 @@ export function HamsterStage({ pose, className = "" }: { pose: HamsterPose; clas
       .then(({ createHamsterStage }) => {
         if (cancelled) return;
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        const stage = createHamsterStage(el, { reducedMotion, look: lookFromUrl() });
+        const stage = createHamsterStage(el, { reducedMotion });
         api.current = stage;
-        const applyTheme = () => stage.setTheme(readTheme());
+        const applyTheme = () => stage.setTheme({ dark: document.documentElement.dataset.theme !== "light" });
         applyTheme();
         themeObserver = new MutationObserver(applyTheme);
         themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
@@ -69,14 +69,6 @@ export function HamsterStage({ pose, className = "" }: { pose: HamsterPose; clas
   );
 }
 
-/**
- * Which hamster look to draw. TEMPORARY while we compare: "painted" by default,
- * `?look=clay` shows the clay one. Remove once a look is chosen.
- */
-function lookFromUrl(): "clay" | "painted" {
-  return new URLSearchParams(window.location.search).get("look") === "clay" ? "clay" : "painted";
-}
-
 function hasWebGL(): boolean {
   try {
     const c = document.createElement("canvas");
@@ -84,13 +76,4 @@ function hasWebGL(): boolean {
   } catch {
     return false;
   }
-}
-
-function readTheme() {
-  const css = getComputedStyle(document.documentElement);
-  return {
-    prop: css.getPropertyValue("--prop").trim() || "#9ea3aa",
-    propSoft: css.getPropertyValue("--prop-soft").trim() || "#c6cacf",
-    dark: document.documentElement.dataset.theme !== "light",
-  };
 }

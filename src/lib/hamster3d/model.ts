@@ -1,9 +1,11 @@
 import * as THREE from "three";
 
 /**
- * The clay hamster and its props, built from rounded primitives (no asset
- * files). Sizes are in "hamster units": the body is about 1.5 long, and y = 0 is
- * the floor. The hamster faces +x.
+ * The hamster and its props, built from rounded primitives (no asset files),
+ * in a hand-painted animated-film look: flat colour bands (toon shading), a thin
+ * warm-brown ink outline, big shiny eyes, rosy cheeks, warm wood props and a few
+ * grass tufts. Sizes are in "hamster units": the body is about 1.5 long, and
+ * y = 0 is the floor. The hamster faces +x.
  *
  * Group layout, so poses can be animated by moving a few pivots:
  *   root            position on the floor, turn (rotation.y)
@@ -16,59 +18,32 @@ import * as THREE from "three";
 
 export type Materials = ReturnType<typeof createMaterials>;
 
-/**
- * Two looks share the same shapes and poses:
- * - "clay": smooth matte clay with a soft sheen, props follow the app theme.
- * - "painted": hand-painted animated-film feel: flat colour bands (toon
- *   shading), a thin warm-brown ink outline, big shiny eyes, rosy cheeks,
- *   warm wood props and a few grass tufts.
- */
-export type Look = "clay" | "painted";
-
-export function createMaterials(look: Look) {
-  const painted = look === "painted";
-  const bands = painted ? toonBands() : null;
-  // Clay: fully rough with a soft sheen, so the fur catches the rim light.
-  // Painted: toon shading in four soft bands.
-  const surface = (clayColor: number, paintColor: number, sheen = 0.5) =>
-    painted
-      ? new THREE.MeshToonMaterial({ color: paintColor, gradientMap: bands })
-      : new THREE.MeshPhysicalMaterial({
-          color: clayColor,
-          roughness: 0.82,
-          metalness: 0,
-          sheen,
-          sheenRoughness: 0.6,
-          sheenColor: new THREE.Color(0xfff0dc),
-        });
-  const prop = surface(0x9ea3aa, 0xb57f4c, 0.1); // painted: warm wood
-  const propSoft = Object.assign(surface(0xc6cacf, 0xd9ab72, 0.1), { side: THREE.DoubleSide }); // the bowl is open
+export function createMaterials() {
+  const bands = toonBands();
+  const paint = (color: number) => new THREE.MeshToonMaterial({ color, gradientMap: bands });
   return {
-    painted,
-    prop,
-    propSoft,
-    // A wooden laptop would be odd: the painted one is pale silver. Clay shares the theme's prop colours.
-    laptopLid: painted ? surface(0, 0xc9ccd1) : prop,
-    laptopKeys: painted ? surface(0, 0xe6e4df) : propSoft,
-    fur: surface(0xd9944a, 0xe9a961, 0.7),
-    furDark: surface(0xbf7a36, 0xcf8a4a, 0.6),
-    cream: surface(0xf7ecdc, 0xfff4e3, 0.4),
-    pink: surface(0xeaa595, 0xf3a9a0, 0.2),
-    paw: surface(0xf2cdbd, 0xf9d8c8, 0.2),
-    nose: surface(0xd9837a, 0xe27f76, 0.1),
-    eye: painted
-      ? new THREE.MeshBasicMaterial({ color: 0x2e1d15 })
-      : new THREE.MeshStandardMaterial({ color: 0x17120f, roughness: 0.18 }),
+    bands,
+    prop: paint(0xb57f4c), // warm wood
+    propSoft: Object.assign(paint(0xd9ab72), { side: THREE.DoubleSide }), // lighter wood; the bowl is open
+    laptopLid: paint(0xc9ccd1),
+    laptopKeys: paint(0xe6e4df),
+    fur: paint(0xe9a961),
+    furDark: paint(0xcf8a4a),
+    cream: paint(0xfff4e3),
+    pink: paint(0xf3a9a0),
+    paw: paint(0xf9d8c8),
+    nose: paint(0xe27f76),
+    eye: new THREE.MeshBasicMaterial({ color: 0x2e1d15 }),
     glint: new THREE.MeshBasicMaterial({ color: 0xffffff }),
     blush: new THREE.MeshBasicMaterial({ color: 0xf28e8e, transparent: true, opacity: 0.55, depthWrite: false }),
-    seed: surface(0x3b3733, 0x4a3b31, 0.1),
-    seedStripe: surface(0xe8e2d6, 0xf3ead8, 0.1),
-    bedding: surface(0xe3cfa5, 0xead39a, 0.3),
-    bookCover: surface(0x3e6a50, 0x5d8c66, 0.2),
-    bookCover2: surface(0xe0b33a, 0xe8bf55, 0.2),
-    grass: surface(0x7fae5f, 0x8cc068, 0.2),
-    grassDark: surface(0x5f8f45, 0x6aa04f, 0.2),
-    flower: surface(0xfff6dc, 0xfffaf0, 0.2),
+    seed: paint(0x4a3b31),
+    seedStripe: paint(0xf3ead8),
+    bedding: paint(0xead39a),
+    bookCover: paint(0x5d8c66),
+    bookCover2: paint(0xe8bf55),
+    grass: paint(0x8cc068),
+    grassDark: paint(0x6aa04f),
+    flower: paint(0xfffaf0),
     outline: new THREE.MeshBasicMaterial({ color: 0x4a3122, side: THREE.BackSide }),
     screen: new THREE.MeshStandardMaterial({ color: 0x2a2d33, emissive: 0xf2c230, emissiveIntensity: 0.28, roughness: 0.4 }),
   };
@@ -84,7 +59,7 @@ function toonBands() {
 }
 
 /**
- * The painted look's ink line: each mesh gets a slightly bigger copy of itself,
+ * The ink line: each mesh gets a slightly bigger copy of itself,
  * drawn from the inside in dark brown, so only a thin rim shows around it.
  * Meshes marked `userData.noOutline` (eye glints, blush, the screen) are skipped.
  */
@@ -167,32 +142,30 @@ export function createHamster(m: Materials): Hamster {
     return c;
   });
   head.add(at(blob(m.nose, 0.06), 0.6, -0.02, 0));
-  // Painted eyes are bigger and taller, with a big and a small highlight.
+  // Big, slightly tall eyes with a big and a small highlight.
   const eyes = [1, -1].map((s) => {
-    const g = at(new THREE.Group(), 0.31, m.painted ? 0.12 : 0.1, 0.29 * s);
-    g.add(m.painted ? blob(m.eye, 0.105, 0.9, 1.15, 1) : blob(m.eye, 0.095));
-    g.add(noOutline(at(blob(m.glint, m.painted ? 0.042 : 0.03), 0.06, 0.05, 0.03 * s)));
-    if (m.painted) g.add(noOutline(at(blob(m.glint, 0.018), 0.08, -0.045, 0.01 * s)));
+    const g = at(new THREE.Group(), 0.31, 0.12, 0.29 * s);
+    g.add(blob(m.eye, 0.105, 0.9, 1.15, 1));
+    g.add(noOutline(at(blob(m.glint, 0.042), 0.06, 0.05, 0.03 * s)));
+    g.add(noOutline(at(blob(m.glint, 0.018), 0.08, -0.045, 0.01 * s)));
     head.add(g);
     return g;
   });
-  if (m.painted) {
-    // Rosy cheeks, and a few fluffy tufts on top of the head.
-    for (const s of [1, -1]) {
-      const b = noOutline(at(blob(m.blush, 0.085, 0.5, 0.55, 1.1), 0.27, -0.06, 0.36 * s));
-      b.rotation.y = 0.5 * s;
-      head.add(b);
-    }
-    const tufts: [number, number, number][] = [
-      [0.05, 0.47, 0.1],
-      [-0.05, 0.48, -0.06],
-      [0.12, 0.44, -0.16],
-    ];
-    for (const [x, y, z] of tufts) {
-      const tuft = at(new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.16, 12), m.fur), x, y, z);
-      tuft.rotation.set(z * 1.5, 0, -0.35 + x);
-      head.add(tuft);
-    }
+  // Rosy cheeks, and a few fluffy tufts on top of the head.
+  for (const s of [1, -1]) {
+    const b = noOutline(at(blob(m.blush, 0.085, 0.5, 0.55, 1.1), 0.27, -0.06, 0.36 * s));
+    b.rotation.y = 0.5 * s;
+    head.add(b);
+  }
+  const tufts: [number, number, number][] = [
+    [0.05, 0.47, 0.1],
+    [-0.05, 0.48, -0.06],
+    [0.12, 0.44, -0.16],
+  ];
+  for (const [x, y, z] of tufts) {
+    const tuft = at(new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.16, 12), m.fur), x, y, z);
+    tuft.rotation.set(z * 1.5, 0, -0.35 + x);
+    head.add(tuft);
   }
   const ears = [1, -1].map((s) => {
     const g = at(new THREE.Group(), -0.06, 0.36, 0.25 * s);
@@ -311,8 +284,8 @@ export function createLaptop(m: Materials) {
   logo.rotation.x = 0.5;
   hinge.add(at(logo, 0.03, 0.32, 0));
   // Warm screen light on the hamster's face (switches off with the laptop).
-  // Toon shading jumps a whole band with extra light, so the painted glow is gentler.
-  const glow = new THREE.PointLight(0xffd36b, m.painted ? 0.6 : 1.6, 1.6, 2);
+  // Gentle: toon shading jumps a whole band with extra light.
+  const glow = new THREE.PointLight(0xffd36b, 0.6, 1.6, 2);
   glow.position.set(-0.35, 0.35, 0);
   hinge.add(glow);
   return { group };
