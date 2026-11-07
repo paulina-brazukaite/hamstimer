@@ -1,6 +1,18 @@
 import * as THREE from "three";
 import type { HamsterPose } from "@/lib/hamster";
-import { BODY, createBowl, createHamster, createLaptop, createMaterials, createNest, createShadow, createWheel } from "./model";
+import {
+  BODY,
+  addOutlines,
+  createBowl,
+  createGrass,
+  createHamster,
+  createLaptop,
+  createMaterials,
+  createNest,
+  createShadow,
+  createWheel,
+  type Look,
+} from "./model";
 
 /**
  * The 3D hamster on a transparent canvas. Loaded lazily by HamsterStage.
@@ -46,10 +58,15 @@ type Prop = "wheel" | "laptop" | "bowl" | "nest";
 /** The laptop and the hamster typing at it are turned this far towards the camera, so both read. */
 const LAPTOP_TURN = -0.82;
 
-export function createHamsterStage(canvas: HTMLCanvasElement, opts: { reducedMotion: boolean }): HamsterStageApi {
+export function createHamsterStage(
+  canvas: HTMLCanvasElement,
+  opts: { reducedMotion: boolean; look: Look },
+): HamsterStageApi {
+  const painted = opts.look === "painted";
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "low-power" });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  // Toon colours are meant to be shown as painted, so no film tone curve on them.
+  renderer.toneMapping = painted ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
   renderer.setClearColor(0x000000, 0);
 
@@ -58,15 +75,17 @@ export function createHamsterStage(canvas: HTMLCanvasElement, opts: { reducedMot
   camera.position.set(2.0, 2.3, 8.1);
   camera.lookAt(0.15, 1.2, 0);
 
-  // Soft studio light: sky/ground fill, a warm key from the front right, a rim from behind.
-  const hemi = new THREE.HemisphereLight(0xffffff, 0xd8c8b4, 1.5);
-  const key = new THREE.DirectionalLight(0xfff6ea, 2.1);
+  // Clay: soft studio light. Painted: warm late-afternoon sun with a cool sky fill.
+  const hemi = painted
+    ? new THREE.HemisphereLight(0xfff1dc, 0xa9c48e, 1.1)
+    : new THREE.HemisphereLight(0xffffff, 0xd8c8b4, 1.5);
+  const key = new THREE.DirectionalLight(painted ? 0xffe0b0 : 0xfff6ea, painted ? 2.4 : 2.1);
   key.position.set(3, 5, 5);
-  const rim = new THREE.DirectionalLight(0xffeedd, 1.6);
+  const rim = new THREE.DirectionalLight(painted ? 0xcfe2ff : 0xffeedd, painted ? 1.1 : 1.6);
   rim.position.set(-4, 3.5, -4);
   scene.add(hemi, key, rim);
 
-  const mats = createMaterials();
+  const mats = createMaterials(opts.look);
   const ham = createHamster(mats);
   const wheel = createWheel(mats);
   const laptop = createLaptop(mats);
@@ -79,6 +98,10 @@ export function createHamsterStage(canvas: HTMLCanvasElement, opts: { reducedMot
   bowl.group.position.set(0.8, 0, 0.62);
   bowl.group.scale.setScalar(1.15);
   scene.add(ham.root, wheel.group, laptop.group, bowl.group, nest.group, shadow.mesh);
+  if (painted) {
+    scene.add(createGrass(mats).group);
+    for (const o of [ham.root, wheel.group, laptop.group, bowl.group, nest.group]) addOutlines(o, mats.outline);
+  }
 
   const props: Record<Prop, THREE.Object3D> = { wheel: wheel.group, laptop: laptop.group, bowl: bowl.group, nest: nest.group };
   const propScale: Record<Prop, number> = { wheel: 0, laptop: 0, bowl: 0, nest: 0 };
@@ -284,12 +307,17 @@ export function createHamsterStage(canvas: HTMLCanvasElement, opts: { reducedMot
       if (opts.reducedMotion) still();
     },
     setTheme(theme) {
-      mats.prop.color.set(theme.prop);
-      mats.propSoft.color.set(theme.propSoft);
-      mats.bedding.color.set(theme.dark ? 0x7a6a50 : 0xe3cfa5);
       shadow.material.opacity = theme.dark ? 0.45 : 0.2;
-      hemi.intensity = theme.dark ? 1.25 : 1.5;
-      rim.intensity = theme.dark ? 2.2 : 1.6;
+      if (painted) {
+        // The painted world keeps its own wood and straw colours in both themes.
+        rim.intensity = theme.dark ? 1.6 : 1.1;
+      } else {
+        mats.prop.color.set(theme.prop);
+        mats.propSoft.color.set(theme.propSoft);
+        mats.bedding.color.set(theme.dark ? 0x7a6a50 : 0xe3cfa5);
+        hemi.intensity = theme.dark ? 1.25 : 1.5;
+        rim.intensity = theme.dark ? 2.2 : 1.6;
+      }
       if (opts.reducedMotion) renderer.render(scene, camera);
     },
     dispose() {
@@ -301,7 +329,7 @@ export function createHamsterStage(canvas: HTMLCanvasElement, opts: { reducedMot
         const mesh = o as THREE.Mesh;
         if (mesh.isMesh) mesh.geometry.dispose();
       });
-      for (const m of Object.values(mats)) m.dispose();
+      for (const m of Object.values(mats)) if (m instanceof THREE.Material) m.dispose();
       shadow.material.map?.dispose();
       shadow.material.dispose();
       renderer.dispose();

@@ -28,7 +28,7 @@ export function HamsterStage({ pose, className = "" }: { pose: HamsterPose; clas
       .then(({ createHamsterStage }) => {
         if (cancelled) return;
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        const stage = createHamsterStage(el, { reducedMotion });
+        const stage = createHamsterStage(el, { reducedMotion, look: lookFromUrl() });
         api.current = stage;
         const applyTheme = () => stage.setTheme(readTheme());
         applyTheme();
@@ -67,6 +67,14 @@ export function HamsterStage({ pose, className = "" }: { pose: HamsterPose; clas
       />
     </div>
   );
+}
+
+/**
+ * Which hamster look to draw. TEMPORARY while we compare: "painted" by default,
+ * `?look=clay` shows the clay one. Remove once a look is chosen.
+ */
+function lookFromUrl(): "clay" | "painted" {
+  return new URLSearchParams(window.location.search).get("look") === "clay" ? "clay" : "painted";
 }
 
 function hasWebGL(): boolean {

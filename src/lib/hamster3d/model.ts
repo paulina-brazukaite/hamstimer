@@ -16,36 +16,97 @@ import * as THREE from "three";
 
 export type Materials = ReturnType<typeof createMaterials>;
 
-export function createMaterials() {
-  // Clay: fully rough with a soft sheen, so the fur catches the rim light.
-  const clay = (color: number, sheen = 0.5) =>
-    new THREE.MeshPhysicalMaterial({
-      color,
-      roughness: 0.82,
-      metalness: 0,
-      sheen,
-      sheenRoughness: 0.6,
-      sheenColor: new THREE.Color(0xfff0dc),
-    });
-  return {
-    fur: clay(0xd9944a, 0.7),
-    furDark: clay(0xbf7a36, 0.6),
-    cream: clay(0xf7ecdc, 0.4),
-    pink: clay(0xeaa595, 0.2),
-    paw: clay(0xf2cdbd, 0.2),
-    nose: clay(0xd9837a, 0.1),
-    eye: new THREE.MeshStandardMaterial({ color: 0x17120f, roughness: 0.18 }),
-    glint: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-    seed: clay(0x3b3733, 0.1),
-    seedStripe: clay(0xe8e2d6, 0.1),
-    prop: clay(0x9ea3aa, 0.1),
-    propSoft: Object.assign(clay(0xc6cacf, 0.1), { side: THREE.DoubleSide }), // the bowl is open
+/**
+ * Two looks share the same shapes and poses:
+ * - "clay": smooth matte clay with a soft sheen, props follow the app theme.
+ * - "painted": hand-painted animated-film feel: flat colour bands (toon
+ *   shading), a thin warm-brown ink outline, big shiny eyes, rosy cheeks,
+ *   warm wood props and a few grass tufts.
+ */
+export type Look = "clay" | "painted";
 
-    bedding: clay(0xe3cfa5, 0.3),
-    bookCover: clay(0x3e6a50, 0.2),
-    bookCover2: clay(0xe0b33a, 0.2),
+export function createMaterials(look: Look) {
+  const painted = look === "painted";
+  const bands = painted ? toonBands() : null;
+  // Clay: fully rough with a soft sheen, so the fur catches the rim light.
+  // Painted: toon shading in four soft bands.
+  const surface = (clayColor: number, paintColor: number, sheen = 0.5) =>
+    painted
+      ? new THREE.MeshToonMaterial({ color: paintColor, gradientMap: bands })
+      : new THREE.MeshPhysicalMaterial({
+          color: clayColor,
+          roughness: 0.82,
+          metalness: 0,
+          sheen,
+          sheenRoughness: 0.6,
+          sheenColor: new THREE.Color(0xfff0dc),
+        });
+  const prop = surface(0x9ea3aa, 0xb57f4c, 0.1); // painted: warm wood
+  const propSoft = Object.assign(surface(0xc6cacf, 0xd9ab72, 0.1), { side: THREE.DoubleSide }); // the bowl is open
+  return {
+    painted,
+    prop,
+    propSoft,
+    // A wooden laptop would be odd: the painted one is pale silver. Clay shares the theme's prop colours.
+    laptopLid: painted ? surface(0, 0xc9ccd1) : prop,
+    laptopKeys: painted ? surface(0, 0xe6e4df) : propSoft,
+    fur: surface(0xd9944a, 0xe9a961, 0.7),
+    furDark: surface(0xbf7a36, 0xcf8a4a, 0.6),
+    cream: surface(0xf7ecdc, 0xfff4e3, 0.4),
+    pink: surface(0xeaa595, 0xf3a9a0, 0.2),
+    paw: surface(0xf2cdbd, 0xf9d8c8, 0.2),
+    nose: surface(0xd9837a, 0xe27f76, 0.1),
+    eye: painted
+      ? new THREE.MeshBasicMaterial({ color: 0x2e1d15 })
+      : new THREE.MeshStandardMaterial({ color: 0x17120f, roughness: 0.18 }),
+    glint: new THREE.MeshBasicMaterial({ color: 0xffffff }),
+    blush: new THREE.MeshBasicMaterial({ color: 0xf28e8e, transparent: true, opacity: 0.55, depthWrite: false }),
+    seed: surface(0x3b3733, 0x4a3b31, 0.1),
+    seedStripe: surface(0xe8e2d6, 0xf3ead8, 0.1),
+    bedding: surface(0xe3cfa5, 0xead39a, 0.3),
+    bookCover: surface(0x3e6a50, 0x5d8c66, 0.2),
+    bookCover2: surface(0xe0b33a, 0xe8bf55, 0.2),
+    grass: surface(0x7fae5f, 0x8cc068, 0.2),
+    grassDark: surface(0x5f8f45, 0x6aa04f, 0.2),
+    flower: surface(0xfff6dc, 0xfffaf0, 0.2),
+    outline: new THREE.MeshBasicMaterial({ color: 0x4a3122, side: THREE.BackSide }),
     screen: new THREE.MeshStandardMaterial({ color: 0x2a2d33, emissive: 0xf2c230, emissiveIntensity: 0.28, roughness: 0.4 }),
   };
+}
+
+/** Four flat light levels for toon shading: shadow, mid, light, highlight. */
+function toonBands() {
+  const tex = new THREE.DataTexture(new Uint8Array([110, 175, 225, 255]), 4, 1, THREE.RedFormat);
+  tex.minFilter = tex.magFilter = THREE.NearestFilter;
+  tex.generateMipmaps = false;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+/**
+ * The painted look's ink line: each mesh gets a slightly bigger copy of itself,
+ * drawn from the inside in dark brown, so only a thin rim shows around it.
+ * Meshes marked `userData.noOutline` (eye glints, blush, the screen) are skipped.
+ */
+export function addOutlines(root: THREE.Object3D, material: THREE.Material, width = 0.02) {
+  const meshes: THREE.Mesh[] = [];
+  root.traverse((o) => {
+    const mesh = o as THREE.Mesh;
+    if (mesh.isMesh && !mesh.userData.noOutline && !mesh.userData.isOutline) meshes.push(mesh);
+  });
+  for (const mesh of meshes) {
+    mesh.geometry.computeBoundingSphere();
+    const r = mesh.geometry.boundingSphere!.radius * Math.max(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+    const line = new THREE.Mesh(mesh.geometry, material);
+    line.userData.isOutline = true;
+    line.scale.setScalar(1 + width / Math.max(r, 0.05));
+    mesh.add(line);
+  }
+}
+
+function noOutline<T extends THREE.Object3D>(o: T): T {
+  o.traverse((c) => (c.userData.noOutline = true));
+  return o;
 }
 
 const SEG = 40;
@@ -90,28 +151,49 @@ export function createHamster(m: Materials): Hamster {
 
   // Body: a soft pear, darker on the back, cream belly.
   inner.add(at(blob(m.fur, BODY.r, BODY.sx, BODY.sy, 0.98), 0, BODY.y, 0));
-  inner.add(at(blob(m.furDark, 0.5, 1.08, 0.6, 0.84), -0.1, 0.84, 0));
-  inner.add(at(blob(m.cream, 0.48, 1.02, 0.74, 0.86), 0.22, 0.42, 0));
+  // The back patch and belly blend into the body, so no ink line of their own.
+  inner.add(noOutline(at(blob(m.furDark, 0.5, 1.08, 0.6, 0.84), -0.1, 0.84, 0)));
+  inner.add(noOutline(at(blob(m.cream, 0.48, 1.02, 0.74, 0.86), 0.22, 0.42, 0)));
   inner.add(at(blob(m.fur, 0.075), -0.72, 0.56, 0)); // tail
 
   // Head: big for a hamster, which is most of the cuteness.
   const head = at(new THREE.Group(), 0.58, 0.82, 0);
   inner.add(head);
   head.add(blob(m.fur, 0.5, 1.04, 0.94, 1));
-  head.add(at(blob(m.cream, 0.21), 0.39, -0.11, 0)); // muzzle
+  head.add(noOutline(at(blob(m.cream, 0.21), 0.39, -0.11, 0))); // muzzle
   const cheeks = [1, -1].map((s) => {
     const c = at(blob(m.cream, 0.23, 1, 0.92, 1), 0.26, -0.16, 0.22 * s);
     head.add(c);
     return c;
   });
   head.add(at(blob(m.nose, 0.06), 0.6, -0.02, 0));
+  // Painted eyes are bigger and taller, with a big and a small highlight.
   const eyes = [1, -1].map((s) => {
-    const g = at(new THREE.Group(), 0.31, 0.1, 0.29 * s);
-    g.add(blob(m.eye, 0.095));
-    g.add(at(blob(m.glint, 0.03), 0.055, 0.045, 0.03 * s));
+    const g = at(new THREE.Group(), 0.31, m.painted ? 0.12 : 0.1, 0.29 * s);
+    g.add(m.painted ? blob(m.eye, 0.105, 0.9, 1.15, 1) : blob(m.eye, 0.095));
+    g.add(noOutline(at(blob(m.glint, m.painted ? 0.042 : 0.03), 0.06, 0.05, 0.03 * s)));
+    if (m.painted) g.add(noOutline(at(blob(m.glint, 0.018), 0.08, -0.045, 0.01 * s)));
     head.add(g);
     return g;
   });
+  if (m.painted) {
+    // Rosy cheeks, and a few fluffy tufts on top of the head.
+    for (const s of [1, -1]) {
+      const b = noOutline(at(blob(m.blush, 0.085, 0.5, 0.55, 1.1), 0.27, -0.06, 0.36 * s));
+      b.rotation.y = 0.5 * s;
+      head.add(b);
+    }
+    const tufts: [number, number, number][] = [
+      [0.05, 0.47, 0.1],
+      [-0.05, 0.48, -0.06],
+      [0.12, 0.44, -0.16],
+    ];
+    for (const [x, y, z] of tufts) {
+      const tuft = at(new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.16, 12), m.fur), x, y, z);
+      tuft.rotation.set(z * 1.5, 0, -0.35 + x);
+      head.add(tuft);
+    }
+  }
   const ears = [1, -1].map((s) => {
     const g = at(new THREE.Group(), -0.06, 0.36, 0.25 * s);
     g.rotation.set(0.35 * s, -0.5 * s, 0);
@@ -208,18 +290,19 @@ export function createLaptop(m: Materials) {
   }
   const laptop = at(new THREE.Group(), -0.2, 0.47, 0);
   group.add(laptop);
-  const base = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.05, 0.98), m.propSoft);
+  const base = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.05, 0.98), m.laptopKeys);
   base.position.y = 0.025;
   laptop.add(base);
   const hinge = at(new THREE.Group(), 0.39, 0.05, 0);
   hinge.rotation.z = -0.14; // lid leans back a little, away from the hamster
   laptop.add(hinge);
-  const lid = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.58, 0.98), m.prop);
+  const lid = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.58, 0.98), m.laptopLid);
   lid.position.set(0, 0.29, 0);
   hinge.add(lid);
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.88, 0.48), m.screen);
   screen.position.set(-0.027, 0.3, 0);
   screen.rotation.y = -Math.PI / 2;
+  noOutline(screen);
   hinge.add(screen);
   // A little sunflower-seed logo on the back of the lid.
   const logo = new THREE.Group();
@@ -228,7 +311,8 @@ export function createLaptop(m: Materials) {
   logo.rotation.x = 0.5;
   hinge.add(at(logo, 0.03, 0.32, 0));
   // Warm screen light on the hamster's face (switches off with the laptop).
-  const glow = new THREE.PointLight(0xffd36b, 1.6, 1.6, 2);
+  // Toon shading jumps a whole band with extra light, so the painted glow is gentler.
+  const glow = new THREE.PointLight(0xffd36b, m.painted ? 0.6 : 1.6, 1.6, 2);
   glow.position.set(-0.35, 0.35, 0);
   hinge.add(glow);
   return { group };
@@ -270,6 +354,48 @@ export function createNest(m: Materials) {
   floor.position.y = 0.04;
   group.add(floor);
   return { group, floorY: 0.08 };
+}
+
+/** Painted look only: a few grass tufts and two tiny flowers at the edges of the floor. */
+export function createGrass(m: Materials) {
+  const group = new THREE.Group();
+  const blade = new THREE.ConeGeometry(0.045, 0.3, 8);
+  const tufts: [number, number, number, number][] = [
+    [-1.65, 0, 0.35, 1],
+    [-1.35, 0, -0.55, 0.8],
+    [1.75, 0, 0.15, 0.9],
+    [1.45, 0, -0.7, 0.75],
+  ];
+  for (const [x, y, z, size] of tufts) {
+    const tuft = at(new THREE.Group(), x, y, z);
+    tuft.scale.setScalar(size);
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2 + x;
+      const b = new THREE.Mesh(blade, i % 2 ? m.grass : m.grassDark);
+      b.position.set(Math.cos(a) * 0.07, 0.14, Math.sin(a) * 0.07);
+      b.rotation.set(Math.sin(a) * 0.35, 0, -Math.cos(a) * 0.35);
+      b.scale.y = 0.8 + ((i * 37) % 10) / 25;
+      tuft.add(b);
+    }
+    group.add(tuft);
+  }
+  const flowers: [number, number][] = [
+    [-1.5, -0.1],
+    [1.62, -0.3],
+  ];
+  for (const [x, z] of flowers) {
+    const f = at(new THREE.Group(), x, 0, z);
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.32, 6), m.grassDark);
+    stem.position.y = 0.16;
+    f.add(stem);
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2;
+      f.add(at(blob(m.flower, 0.045, 1, 0.5, 1), Math.cos(a) * 0.05, 0.33, Math.sin(a) * 0.05));
+    }
+    f.add(at(blob(m.bookCover2, 0.03), 0, 0.34, 0));
+    group.add(f);
+  }
+  return { group };
 }
 
 /** A soft contact shadow: a blurred dark ellipse on the floor. */
