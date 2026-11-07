@@ -13,6 +13,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { UndoToast } from "@/components/undo-toast";
 import { useTimer } from "@/lib/use-timer";
 import { useModKey } from "@/lib/use-stored";
+import { NotifyPrompt } from "@/components/notify-prompt";
 import {
   EXTENSION_MS,
   canStart,
@@ -172,6 +173,9 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
             </div>
           )}
         </div>
+
+        {/* Asked once, while a focus block runs: the moment a heads-up is clearly useful. */}
+        {phase === "focus" && running && <NotifyPrompt />}
       </div>
 
       {/* Key hints: pointless on a touch screen, so hidden there. */}

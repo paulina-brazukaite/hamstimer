@@ -26,6 +26,10 @@ let beforeFinish: { state: TimerState; history: HistoryEntry[] } | null = null;
 const listeners = new Set<() => void>();
 let stopClock: (() => void) | null = null;
 const focusEndListeners = new Set<(s: TimerState) => void>();
+const breakEndListeners = new Set<(s: TimerState) => void>();
+
+/** Only alert for a boundary crossed just now, not one passed while the laptop slept for an hour. */
+const ALERT_WINDOW_MS = 2 * 60_000;
 
 function load(): TimerSnapshot {
   const now = Date.now();
@@ -53,24 +57,33 @@ function emit() {
 function refresh() {
   if (!snapshot) return;
   const now = Date.now();
-  const state = tick(snapshot.state, now);
-  if (state !== snapshot.state) saveTimer(state);
+  const prev = snapshot.state;
+  const state = tick(prev, now);
+  if (state !== prev) saveTimer(state);
   const focusJustEnded =
-    snapshot.state.phase === "focus" &&
-    state.phase !== "focus" &&
-    state.leftAt !== null &&
-    now - state.leftAt < 2 * 60_000; // not after the laptop slept for an hour
+    prev.phase === "focus" && state.phase !== "focus" && state.leftAt !== null && now - state.leftAt < ALERT_WINDOW_MS;
+  // tick() only ends a running break by running out, so this is the break finishing on its own.
+  const breakEndedAt = prev.phase === "break" && prev.startedAt !== null ? prev.startedAt + prev.breakMs - prev.elapsedMs : null;
+  const breakJustEnded =
+    breakEndedAt !== null && state.phase === "complete" && now - breakEndedAt < ALERT_WINDOW_MS;
   const undoUntil = snapshot.undoUntil !== null && now < snapshot.undoUntil ? snapshot.undoUntil : null;
   if (undoUntil === null) beforeFinish = null;
   snapshot = { ...snapshot, state, now, undoUntil };
   emit();
   if (focusJustEnded) focusEndListeners.forEach((l) => l(state));
+  if (breakJustEnded) breakEndListeners.forEach((l) => l(state));
 }
 
 /** Called once when focus runs out while the app is open (for the chime and notification). */
 export function onFocusEnd(listener: (s: TimerState) => void): () => void {
   focusEndListeners.add(listener);
   return () => focusEndListeners.delete(listener);
+}
+
+/** Called once when a break runs out while the app is open (for the "break's over" notification). */
+export function onBreakEnd(listener: (s: TimerState) => void): () => void {
+  breakEndListeners.add(listener);
+  return () => breakEndListeners.delete(listener);
 }
 
 /**

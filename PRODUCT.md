@@ -29,7 +29,7 @@ Most timers are good at telling you to stop; Nextline cares about the moment aft
 - Used alongside the real work, usually in a browser tab or as an installed app next to an editor, design tool or document.
 - Keyboard is the primary input: ⌘K / Ctrl+K command menu holds every action; Enter adds a line, Space starts/pauses (also from the empty line input), D ticks the current line done, E adds 15 minutes, A puts the cursor back in the line input; on the resume card R resumes and Esc finishes the task (undoable).
 - Focus blocks follow presets: 25/5, 50/10, 90/15 or custom, with +15 extension. The length buttons sit under the clock whenever no block is running (also in the command menu and on the /timer pages).
-- An end-of-focus chime (Web Audio) and optional browser notifications mark the end of a block.
+- An end-of-focus chime (Web Audio) marks the end of a block. Optional browser notifications (only while the tab is in the background) mark the end of a block and of a break; the app asks once, with its own card during the first running block, never on page load.
 
 ## Capabilities and Constraints
 
