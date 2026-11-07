@@ -3,8 +3,8 @@
 import { update } from "@/lib/timer-store";
 import { PRESETS, choosePreset, type TimerState } from "@/lib/timer";
 
-const chip = "min-h-9 rounded-lg border px-3 font-mono text-xs transition-colors";
-const on = "border-fg text-fg";
+const chip = "min-h-10 rounded-full border px-4 text-sm tabular-nums transition-colors";
+const on = "border-fg font-semibold text-fg";
 const off = "border-line text-muted hover:text-fg";
 
 /**
@@ -47,7 +47,7 @@ export function PresetPicker({ state }: { state: TimerState }) {
       </div>
 
       {isCustom && (
-        <div className="flex items-center gap-3 font-mono text-xs text-muted">
+        <div className="flex items-center gap-3 text-xs text-muted">
           <MinutesInput label="Focus" value={focusMin} max={240} onCommit={(f) => setCustom(f, breakMin)} />
           <MinutesInput label="Break" value={breakMin} max={60} onCommit={(b) => setCustom(focusMin, b)} />
         </div>
@@ -75,7 +75,7 @@ function MinutesInput(props: { label: string; value: number; max: number; onComm
         onKeyDown={(e) => {
           if (e.key === "Enter") e.currentTarget.blur();
         }}
-        className="w-16 rounded-lg border border-line bg-well px-2 py-1.5 text-fg"
+        className="w-16 rounded-xl border border-line bg-well px-2 py-1.5 text-fg"
       />
       min
     </label>

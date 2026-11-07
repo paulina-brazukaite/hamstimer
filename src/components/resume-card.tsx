@@ -43,9 +43,9 @@ export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
     <section
       role="dialog"
       aria-labelledby="resume-lead"
-      className="animate-rise-in w-full max-w-lg rounded-2xl border border-line bg-surface p-7 shadow-card sm:p-9"
+      className="animate-rise-in w-full max-w-lg rounded-[20px] border border-line bg-surface p-7 shadow-card sm:p-9"
     >
-      <p className="font-mono text-xs text-faint">
+      <p className="text-xs text-faint">
         Where you left off{ago && <> · {ago}</>}
       </p>
 
@@ -55,11 +55,11 @@ export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
       </p>
       {/* "pretty", not "balance": balancing around the inline label leaves a short first line. */}
       <h1 id="resume-lead" className={`mt-2 ${leadClass(line.text, "pretty")}`}>
-        <span className="mr-1 align-[0.2em] font-mono text-sm font-normal tracking-normal text-lamp">↳ now</span>{" "}
+        <span className="mr-1 align-[0.2em] text-sm font-normal tracking-normal text-lamp-ink">↳ now</span>{" "}
         {line.text}
       </h1>
 
-      <div className="mt-5 flex items-center gap-3 font-mono text-xs text-faint">
+      <div className="mt-5 flex items-center gap-3 text-xs text-faint">
         <Pomodoros count={line.pomodoros} lit />
         <span>
           {line.pomodoros === 0
@@ -73,7 +73,7 @@ export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
           <div className="h-0.5 w-full rounded-full bg-line-soft" aria-hidden="true">
             <div className="h-0.5 rounded-full bg-lamp" style={{ width: `${share * 100}%` }} />
           </div>
-          <p className="mt-2.5 font-mono text-xs text-faint tabular-nums">
+          <p className="mt-2.5 text-xs text-faint tabular-nums">
             Paused at {Math.round(state.elapsedMs / MIN)} of {Math.round(state.focusMs / MIN)} min
           </p>
         </div>
@@ -84,18 +84,18 @@ export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
           type="button"
           autoFocus
           onClick={() => update(resumeSession)}
-          className="inline-flex min-h-11 items-center gap-3 rounded-lg bg-lamp px-5 text-[15px] font-medium text-lamp-fg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lamp"
+          className="inline-flex min-h-11 items-center gap-3 rounded-full bg-lamp px-6 text-[15px] font-semibold text-lamp-fg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg"
         >
           Resume
-          <kbd className="font-mono text-xs opacity-70 pointer-coarse:hidden">R</kbd>
+          <kbd className="text-xs opacity-70 pointer-coarse:hidden">R</kbd>
         </button>
         <button
           type="button"
           onClick={finishTaskUndoable}
-          className="inline-flex min-h-11 items-center gap-3 rounded-lg px-4 text-[15px] text-muted transition-colors hover:text-fg"
+          className="inline-flex min-h-11 items-center gap-3 rounded-full border border-line px-5 text-[15px] text-muted transition-colors hover:text-fg"
         >
           Finish task
-          <kbd className="font-mono text-xs text-faint pointer-coarse:hidden">Esc</kbd>
+          <kbd className="text-xs text-faint pointer-coarse:hidden">Esc</kbd>
         </button>
       </div>
     </section>

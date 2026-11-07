@@ -9,7 +9,7 @@ import { Pomodoros } from "@/components/task-view";
 import { exportBackup, importBackupFile } from "@/lib/backup-actions";
 
 const button =
-  "inline-flex min-h-9 items-center rounded-lg border border-line px-3 font-mono text-xs text-muted transition-colors hover:text-fg";
+  "inline-flex min-h-10 items-center rounded-full border border-line bg-surface px-4 text-sm text-fg transition-colors hover:border-faint";
 
 export function HistoryScreen() {
   const raw = useStoredRaw(KEYS.history);
@@ -51,7 +51,7 @@ export function HistoryScreen() {
           </div>
         </div>
 
-        <p role="status" className="mt-3 min-h-5 font-mono text-xs text-faint">
+        <p role="status" className="mt-3 min-h-5 text-xs text-faint">
           {message}
         </p>
 
@@ -78,12 +78,12 @@ function HistoryRow({ entry }: { entry: HistoryEntry }) {
     <li className="border-b border-line-soft py-5">
       <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1">
         <p className="text-[15px] font-medium text-fg">{entry.title || entry.lines[0]?.text || "Untitled task"}</p>
-        <p className="text-right font-mono text-[13px] text-muted tabular-nums">{formatDuration(entry.focusedMs)}</p>
-        <p className="font-mono text-xs text-faint">
+        <p className="text-right text-[13px] text-muted tabular-nums">{formatDuration(entry.focusedMs)}</p>
+        <p className="text-xs text-faint">
           {entry.lines.length} {entry.lines.length === 1 ? "line" : "lines"}
           {pomodoros > 0 && ` · ${pomodoros} pomodoro${pomodoros === 1 ? "" : "s"}`}
         </p>
-        <p className="text-right font-mono text-xs whitespace-nowrap text-faint">
+        <p className="text-right text-xs whitespace-nowrap text-faint">
           <time dateTime={new Date(entry.endedAt).toISOString()}>{formatWhen(entry.endedAt)}</time>
         </p>
       </div>
@@ -92,7 +92,7 @@ function HistoryRow({ entry }: { entry: HistoryEntry }) {
       <ul className="mt-3 flex flex-col gap-1.5">
         {entry.lines.map((l) => (
           <li key={l.id} className="flex items-center gap-3 text-sm">
-            <span aria-hidden="true" className="w-3 flex-none font-mono text-xs text-faint">
+            <span aria-hidden="true" className="w-3 flex-none text-xs text-faint">
               {l.doneAt !== null ? "✓" : "·"}
             </span>
             <span className={`min-w-0 flex-1 break-words ${l.doneAt !== null ? "text-muted" : "text-faint"}`}>

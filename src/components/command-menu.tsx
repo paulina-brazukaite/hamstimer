@@ -135,7 +135,7 @@ function MenuPanel({ onClose }: { onClose: () => void }) {
           {results.map((c, i) => (
             <li key={c.id}>
               {(i === 0 || results[i - 1].group !== c.group) && (
-                <p className="px-5 pt-2 pb-1 font-mono text-[11px] text-faint">{c.group}</p>
+                <p className="px-5 pt-2 pb-1 text-[11px] text-faint">{c.group}</p>
               )}
               <div
                 id={`cmd-${i}`}
@@ -146,14 +146,14 @@ function MenuPanel({ onClose }: { onClose: () => void }) {
                 className="mx-2 flex min-h-10 cursor-pointer items-center justify-between gap-4 rounded-lg px-3 text-sm text-muted aria-selected:bg-well aria-selected:text-fg"
               >
                 <span>{c.label}</span>
-                {c.keys && <kbd className="font-mono text-xs text-faint">{c.keys}</kbd>}
+                {c.keys && <kbd className="text-xs text-faint">{c.keys}</kbd>}
               </div>
             </li>
           ))}
           {results.length === 0 && <li className="px-5 py-3 text-sm text-faint">No matching command</li>}
         </ul>
 
-        <p className="flex gap-4 border-t border-line px-4 py-2.5 font-mono text-[11px] text-faint">
+        <p className="flex gap-4 border-t border-line px-4 py-2.5 text-[11px] text-faint">
           <span>↑↓ move</span>
           <span>Enter run</span>
           <span>Esc close</span>

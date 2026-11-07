@@ -85,7 +85,7 @@ function TitleInput({ value }: { value: string }) {
         const text = e.currentTarget.value;
         if (text !== value) update((s) => setTitle(s, text));
       }}
-      className="w-full bg-transparent pb-1 text-xl font-semibold tracking-tight text-fg outline-none placeholder:font-normal placeholder:text-faint sm:text-2xl"
+      className="w-full bg-transparent pb-1 text-2xl font-bold tracking-[-0.03em] text-fg outline-none placeholder:font-normal placeholder:text-faint sm:text-[30px]"
     />
   );
 }
@@ -106,7 +106,7 @@ function LineRow({
   return (
     <li
       aria-current={current ? "step" : undefined}
-      className={`group flex min-h-11 items-center gap-3 rounded-lg px-3 ${
+      className={`group flex min-h-11 items-center gap-3 rounded-xl px-3.5 ${
         current ? "border border-line bg-surface" : "border border-transparent"
       }`}
     >
@@ -118,13 +118,17 @@ function LineRow({
         onClick={() => update((s, now) => toggleDone(s, line.id, now))}
         className={`flex size-[18px] flex-none items-center justify-center rounded-[5px] border text-[11px] transition-colors ${
           done
-            ? "border-line bg-line text-muted"
+            ? "border-faint bg-faint text-ground"
             : current
-              ? "border-lamp hover:bg-lamp/15"
+              ? "border-2 border-fg hover:bg-lamp/30"
               : "border-faint/60 hover:border-fg"
         }`}
       >
-        {done && "✓"}
+        {done && (
+          <svg viewBox="0 0 24 24" className="size-[11px]" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M5 12.5l4.5 4.5L19 7.5" />
+          </svg>
+        )}
       </button>
 
       {done || current ? (
@@ -149,10 +153,10 @@ function LineRow({
 
       <Pomodoros count={line.pomodoros} lit={current} />
       {clock ? (
-        <span className="font-mono text-[13px] text-lamp tabular-nums">{clock}</span>
+        <span className="text-[13px] font-bold text-lamp-ink tabular-nums">{clock}</span>
       ) : (
         minutes > 0 && (
-          <span className="font-mono text-xs text-faint tabular-nums" title="Focus time on this line">
+          <span className="text-xs text-faint tabular-nums" title="Focus time on this line">
             {minutes} min
           </span>
         )
@@ -177,7 +181,7 @@ export function Pomodoros({ count, lit }: { count: number; lit: boolean }) {
   const label = `${count} pomodoro${count === 1 ? "" : "s"}`;
   if (count > 4) {
     return (
-      <span className={`font-mono text-xs ${lit ? "text-lamp" : "text-faint"}`} title={label} aria-label={label}>
+      <span className={`text-xs ${lit ? "text-lamp-ink" : "text-faint"}`} title={label} aria-label={label}>
         ●×{count}
       </span>
     );
@@ -234,7 +238,7 @@ function LineInput({ big, hasLines }: { big: boolean; hasLines: boolean }) {
         className={
           big
             ? `block w-full border-b border-line bg-transparent pb-2 text-center leading-snug font-semibold tracking-tight text-fg outline-none placeholder:font-normal placeholder:text-faint focus:border-faint ${LEAD_SIZE}`
-            : "block w-full rounded-lg border border-line bg-transparent px-3 py-2.5 text-[15px] text-fg outline-none placeholder:text-faint focus:border-faint"
+            : "block w-full rounded-xl border border-line bg-transparent px-3.5 py-3 text-[15px] text-fg outline-none placeholder:text-faint focus:border-faint"
         }
       />
     </div>
@@ -253,7 +257,7 @@ function DoneQuestion({ line }: { line: Line }) {
   }, []);
 
   return (
-    <div role="group" aria-label="Focus done" className="mt-3 rounded-lg border border-line bg-surface p-4">
+    <div role="group" aria-label="Focus done" className="mt-3 rounded-xl border border-line bg-surface p-4">
       <p className="text-[15px] text-fg">
         Done with <span className="font-medium">“{line.text}”</span>?
       </p>
@@ -265,18 +269,18 @@ function DoneQuestion({ line }: { line: Line }) {
             update(markCurrentDone);
             requestAnimationFrame(focusLineInput);
           }}
-          className="inline-flex min-h-9 items-center gap-2.5 rounded-lg bg-lamp px-4 text-sm font-medium text-lamp-fg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lamp"
+          className="inline-flex min-h-9 items-center gap-2.5 rounded-full bg-lamp px-5 text-sm font-semibold text-lamp-fg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg"
         >
           Done
-          <kbd className="font-mono text-xs opacity-70 pointer-coarse:hidden">D</kbd>
+          <kbd className="text-xs opacity-70 pointer-coarse:hidden">D</kbd>
         </button>
         <button
           type="button"
           onClick={() => update(keepGoing)}
-          className="inline-flex min-h-9 items-center gap-2.5 rounded-lg border border-line px-4 text-sm text-muted transition-colors hover:text-fg"
+          className="inline-flex min-h-9 items-center gap-2.5 rounded-full border border-line px-4 text-sm text-muted transition-colors hover:text-fg"
         >
           Still on it
-          <kbd className="font-mono text-xs text-faint pointer-coarse:hidden">Esc</kbd>
+          <kbd className="text-xs text-faint pointer-coarse:hidden">Esc</kbd>
         </button>
       </div>
     </div>

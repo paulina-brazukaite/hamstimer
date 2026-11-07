@@ -20,7 +20,7 @@ export default function Home() {
             Type what you&apos;re working on, press Enter, and start a pomodoro on it. Add the next step as you
             go. Next time, Nextline opens on exactly where you left off: one key to resume.
           </p>
-          <p className="mt-3 font-mono text-xs text-faint">No account · your data stays in this browser</p>
+          <p className="mt-3 text-xs text-faint">No account · your data stays in this browser</p>
         </FirstVisitIntro>
       }
     />

@@ -30,7 +30,7 @@ export default async function BlogIndex() {
               {posts.map((p) => (
                 <li key={p.slug} className="border-b border-line-soft">
                   <Link href={`/blog/${p.slug}`} className="group block py-6">
-                    <time dateTime={p.date} className="font-mono text-xs text-faint">
+                    <time dateTime={p.date} className="text-xs text-faint">
                       {formatPostDate(p.date)}
                     </time>
                     <h2 className="mt-2 text-lg font-semibold tracking-tight text-fg group-hover:underline group-hover:decoration-line group-hover:underline-offset-4">

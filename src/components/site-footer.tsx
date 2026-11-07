@@ -9,7 +9,7 @@ export function SiteFooter() {
     <footer className="border-t border-line-soft px-6 py-8 sm:px-10">
       <nav
         aria-label="Site"
-        className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-xs text-faint"
+        className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-faint"
       >
         {TIMER_PAGES.map((p) => (
           <Link key={p.slug} href={`/timer/${p.slug}`} className={link}>

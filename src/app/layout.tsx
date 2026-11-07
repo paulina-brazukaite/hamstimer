@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-// Fonts ship inside the `geist` package (no Google Fonts request at build or
-// runtime), which also means they work offline once the PWA is installed.
-import { GeistSans } from "geist/font/sans";
+// Geist Mono ships inside the `geist` package (used for code in blog posts).
+// Schibsted Grotesk is self-hosted by next/font at build time: the browser never
+// asks Google for it, so it still works offline once the PWA is installed.
+import { Schibsted_Grotesk } from "next/font/google";
 import { GeistMono } from "geist/font/mono";
 import { KEYS } from "@/lib/storage";
 import { DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
@@ -24,8 +25,10 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
+const schibsted = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-schibsted" });
+
 export const viewport: Viewport = {
-  themeColor: "#0f1012",
+  themeColor: "#121417",
 };
 
 // Runs during HTML parsing, before first paint, so nothing flashes:
@@ -40,7 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       data-theme="dark"
       suppressHydrationWarning
-      className={`${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}
+      className={`${schibsted.variable} ${GeistMono.variable} h-full antialiased`}
     >
       <head>
         <InlineScript html={beforePaintScript} />

@@ -45,7 +45,6 @@ Most timers are good at telling you to stop; Nextline cares about the moment aft
 
 - Name: Nextline. Tagline: "A focus timer that remembers where your head was."
 - Voice: plain, short, second person, practical British-leaning English ("look out of a window", "Future you will be grateful"); no hype.
-- Made by a designer and a developer in Vilnius.
 - Free side project: no pricing, upsells, accounts or paid tiers to design for.
 
 ## Evidence on Hand

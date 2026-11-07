@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Nextline is a small focus timer built by a designer and a developer in Vilnius.",
+  description: "Nextline is a small focus timer that remembers where your head was.",
   alternates: { canonical: "/about" },
   openGraph: { url: "/about" },
 };
@@ -29,11 +29,6 @@ export default function AboutPage() {
               you see, and one key picks it back up.
             </p>
           </div>
-
-          <h2 className="mt-12 text-lg font-semibold tracking-tight text-fg">Who made it</h2>
-          <p className="mt-3 text-[17px] leading-relaxed text-muted">
-            Nextline is built by a designer and a developer in Vilnius.
-          </p>
 
           <h2 className="mt-12 text-lg font-semibold tracking-tight text-fg">Your data</h2>
           <p className="mt-3 text-[17px] leading-relaxed text-muted">

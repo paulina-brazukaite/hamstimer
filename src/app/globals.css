@@ -1,38 +1,47 @@
 @import "tailwindcss";
 
 /*
-  Design tokens (from the "visual direction v1" canvas).
-  Dark is the default; [data-theme="light"] on <html> switches to warm light.
+  Design tokens (Option C, "the hamster at work", on the hamster redesign canvas).
+  Dark is the default; [data-theme="light"] on <html> switches to light.
   Components use semantic Tailwind classes like bg-ground, text-muted, bg-lamp,
   so the theme swap is just these variables changing.
+  - lamp: the sunflower-yellow fill (progress, dots, the Resume and Done buttons).
+  - lamp-ink: the same accent as text; yellow text fails contrast on light, so it's ink there.
+  - prop / prop-soft: the hamster scene's objects (wheel, laptop, nest).
 */
 :root {
-  --ground: #0f1012;
-  --surface: #17191c;
-  --well: #0f1012;
-  --line: #2b2f35;
-  --line-soft: #23262b;
-  --fg: #ece9e3;
-  --muted: #9a9ea6;
-  --faint: #7d828a;
-  --lamp: #e9a84c;
-  --lamp-fg: #1a1408;
-  --shadow: 0 24px 60px rgb(0 0 0 / 0.35);
+  --ground: #121417;
+  --surface: #1c1f23;
+  --well: #121417;
+  --line: #2a2e34;
+  --line-soft: #23272c;
+  --fg: #eceef0;
+  --muted: #a3a9b1;
+  --faint: #858b93;
+  --lamp: #f2c230;
+  --lamp-fg: #15171a;
+  --lamp-ink: #f2c230;
+  --prop: #6e747c;
+  --prop-soft: #4a5058;
+  --shadow: 0 24px 60px rgb(0 0 0 / 0.4);
   color-scheme: dark;
 }
 
 :root[data-theme="light"] {
-  --ground: #f5f1e8;
-  --surface: #fffdf8;
-  --well: #f5f1e8;
-  --line: #ddd5c5;
-  --line-soft: #e8e1d3;
-  --fg: #1e1c19;
-  --muted: #65605a;
-  --faint: #65605a;
-  --lamp: #9a5a0c;
-  --lamp-fg: #fffdf8;
-  --shadow: 0 20px 50px rgb(80 60 30 / 0.1);
+  --ground: #f6f7f8;
+  --surface: #ffffff;
+  --well: #f6f7f8;
+  --line: #e2e4e7;
+  --line-soft: #e3e5e8;
+  --fg: #15171a;
+  --muted: #5a6068;
+  --faint: #6e747c;
+  --lamp: #f2c230;
+  --lamp-fg: #15171a;
+  --lamp-ink: #15171a;
+  --prop: #9ea3aa;
+  --prop-soft: #c6cacf;
+  --shadow: 0 1px 2px rgb(21 23 26 / 0.06), 0 8px 24px rgb(21 23 26 / 0.06);
   color-scheme: light;
 }
 
@@ -47,8 +56,11 @@
   --color-faint: var(--faint);
   --color-lamp: var(--lamp);
   --color-lamp-fg: var(--lamp-fg);
+  --color-lamp-ink: var(--lamp-ink);
+  --color-prop: var(--prop);
+  --color-prop-soft: var(--prop-soft);
   --shadow-card: var(--shadow);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-schibsted);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -57,9 +69,9 @@ body {
   color: var(--fg);
 }
 
-/* Text selection from the palette, not the browser's blue (amber stays reserved). */
+/* Text selection from the palette, not the browser's blue. */
 ::selection {
-  background: color-mix(in srgb, var(--fg) 22%, transparent);
+  background: color-mix(in srgb, var(--lamp) 40%, transparent);
   color: var(--fg);
 }
 
@@ -83,22 +95,10 @@ body {
 
 /*
   First-visit intro on "/" (see first-visit-intro.tsx). New visitors see the text;
-  returning ones (html[data-returning], set before paint) see a one-line toggle.
+  returning ones (html[data-returning], set before paint) don't see it at all.
 */
-.first-visit-toggle {
-  display: none;
-}
 [data-returning] .first-visit {
-  padding-top: 1.5rem;
-}
-[data-returning] .first-visit-toggle {
-  display: block;
-}
-[data-returning] .first-visit:not(.is-open) .first-visit-full {
   display: none;
-}
-[data-returning] .first-visit.is-open .first-visit-full {
-  margin-bottom: 0.75rem;
 }
 
 /* Blog post body (HTML from Markdown). Plain element styles, scoped to .post-body. */

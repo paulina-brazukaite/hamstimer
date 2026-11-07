@@ -4,6 +4,9 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { AppHeader } from "@/components/app-header";
 import { PresetPicker } from "@/components/preset-picker";
 import { ResumeCard } from "@/components/resume-card";
+import { HamsterScene } from "@/components/hamster-scene";
+import { useTabIcon } from "@/components/tab-icon";
+import { hamsterPose } from "@/lib/hamster";
 import { TaskView, focusLineInput } from "@/components/task-view";
 import { finishTaskUndoable, getSnapshot, update } from "@/lib/timer-store";
 import { SiteFooter } from "@/components/site-footer";
@@ -51,6 +54,7 @@ export function FocusScreen({ preset, intro }: { preset?: PresetId; intro?: Reac
   const resuming = snap?.resume ?? false;
 
   useDocumentTitle(state, now, resuming);
+  useTabIcon(state ? hamsterPose(state, resuming) : null);
   useTimerShortcuts();
 
   const pct = state && !resuming ? Math.round(progress(state, now) * 1000) / 10 : 0;
@@ -58,8 +62,8 @@ export function FocusScreen({ preset, intro }: { preset?: PresetId; intro?: Reac
   return (
     <>
     <div className="flex min-h-svh flex-col">
-      <div className="h-0.5 w-full bg-line-soft" aria-hidden="true">
-        <div className="h-0.5 bg-lamp transition-[width] duration-300" style={{ width: `${pct}%` }} />
+      <div className="h-[3px] w-full bg-line-soft" aria-hidden="true">
+        <div className="h-[3px] bg-lamp transition-[width] duration-300" style={{ width: `${pct}%` }} />
       </div>
 
       <AppHeader links={[{ href: "/history", label: "History" }]} />
@@ -71,7 +75,8 @@ export function FocusScreen({ preset, intro }: { preset?: PresetId; intro?: Reac
           // nothing, so a saved task never flashes an empty screen first.
           <div className="flex-1" />
         ) : resuming ? (
-          <div className="flex flex-1 items-center justify-center px-6 py-10">
+          <div className="flex flex-1 flex-col items-center justify-center gap-5 px-6 py-10">
+            <HamsterScene pose="sleep" />
             <ResumeCard state={state} now={now} />
           </div>
         ) : (
@@ -101,22 +106,23 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
   return (
     <>
       <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-10">
+        <HamsterScene pose={hamsterPose(state, false)} className="mb-4" />
         <TaskView state={state} now={now} />
 
         {/* The clock is the frame, not the subject: lighter, smaller, and only at full
             strength while it's actually running (so paused looks paused). */}
         <div className="mt-2 flex flex-col items-center gap-3">
           <p
-            className={`font-mono text-5xl leading-none font-light tracking-tighter tabular-nums sm:text-7xl ${
+            className={`text-6xl leading-[0.9] font-medium tracking-[-0.055em] tabular-nums sm:text-[104px] ${
               running ? "text-fg" : "text-muted"
             }`}
             role="timer"
             aria-live="off"
           >
-            {formatClock(remaining(state, now))}
+            <ClockText text={formatClock(remaining(state, now))} />
           </p>
 
-          <p className="min-h-5 text-center font-mono text-[13px] text-faint">
+          <p className="min-h-5 text-center text-sm text-faint tabular-nums">
             {phase === "focus" && (
               <>
                 of {formatClock(phaseLength(state))}
@@ -135,12 +141,12 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
           {!active && <PresetPicker state={state} />}
 
           {hasLines && (
-            <div className="flex flex-wrap justify-center gap-3">
+            <div className="flex flex-wrap justify-center gap-2 pt-2">
               {(active || startable) && (
                 <button
                   type="button"
                   onClick={() => update(toggle)}
-                  className="min-h-10 rounded-lg border border-line bg-surface px-5 text-sm transition-colors hover:border-faint"
+                  className="min-h-11 rounded-full bg-fg px-6 text-[15px] font-semibold text-ground transition-opacity hover:opacity-85"
                 >
                   {running ? "Pause" : active ? "Resume" : "Start"}
                 </button>
@@ -149,7 +155,7 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
                 <button
                   type="button"
                   onClick={() => update(stop)}
-                  className="min-h-10 rounded-lg px-4 text-sm text-muted transition-colors hover:text-fg"
+                  className="min-h-11 rounded-full border border-line bg-surface px-5 text-[15px] transition-colors hover:border-faint"
                 >
                   Stop
                 </button>
@@ -157,7 +163,7 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
               <button
                 type="button"
                 onClick={finishTaskUndoable}
-                className="min-h-10 rounded-lg px-4 text-sm text-muted transition-colors hover:text-fg"
+                className="min-h-11 rounded-full px-4 text-[15px] text-muted transition-colors hover:text-fg"
               >
                 Finish task
               </button>
@@ -167,7 +173,7 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
       </div>
 
       {/* Key hints: pointless on a touch screen, so hidden there. */}
-      <div className="flex flex-wrap justify-center gap-x-7 gap-y-2 px-6 pb-8 font-mono text-xs text-faint pointer-coarse:hidden">
+      <div className="flex flex-wrap justify-center gap-x-7 gap-y-2 px-6 pb-8 text-xs text-faint pointer-coarse:hidden">
         <Hint k="Enter" label="add line" />
         {(active || startable) && <Hint k="Space" label={running ? "pause" : active ? "resume" : "start"} />}
         {current && <Hint k="D" label="done" />}
@@ -179,10 +185,22 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
   );
 }
 
+/** The tabular colon is as wide as a digit; pull it in so "24:56" reads as one number. */
+function ClockText({ text }: { text: string }) {
+  const [m, s] = text.split(":");
+  return (
+    <>
+      {m}
+      <span className="-mx-[0.16em]">:</span>
+      {s}
+    </>
+  );
+}
+
 function Hint({ k, label }: { k: string; label: string }) {
   return (
     <span>
-      <span className="text-fg">{k}</span> {label}
+      <span className="font-semibold text-fg">{k}</span> {label}
     </span>
   );
 }

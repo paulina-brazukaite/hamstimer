@@ -49,13 +49,13 @@ async function Article({ params }: { params: Promise<{ slug: string }> }) {
 
   return (
     <article>
-      <Link href="/blog" className="font-mono text-xs text-faint transition-colors hover:text-fg">
+      <Link href="/blog" className="text-xs text-faint transition-colors hover:text-fg">
         ← All posts
       </Link>
       <h1 className="mt-6 text-3xl leading-tight font-semibold tracking-tight text-balance sm:text-4xl">
         {post.title}
       </h1>
-      <time dateTime={post.date} className="mt-4 block font-mono text-xs text-faint">
+      <time dateTime={post.date} className="mt-4 block text-xs text-faint">
         {formatPostDate(post.date)}
       </time>
       {post.image && (

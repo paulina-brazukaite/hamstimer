@@ -32,17 +32,17 @@ export function UndoToast({ visible }: { visible: boolean }) {
   return (
     <div role="status" className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
       {visible && (
-        <div className="pointer-events-auto flex items-center gap-1 rounded-lg border border-line bg-surface py-1 pr-1 pl-4 text-sm text-muted shadow-card">
+        <div className="pointer-events-auto flex items-center gap-1 rounded-full border border-line bg-surface py-1 pr-1 pl-4 text-sm text-muted shadow-card">
           <span>Task finished.</span>
           <button
             type="button"
             // Don't take focus from a text box: its blur could save, which ends the undo.
             onMouseDown={(e) => e.preventDefault()}
             onClick={undoFinishTask}
-            className="inline-flex min-h-9 items-center gap-2.5 rounded-md px-3 text-fg underline decoration-line underline-offset-4 transition-colors hover:decoration-fg"
+            className="inline-flex min-h-9 items-center gap-2.5 rounded-full px-3 text-fg underline decoration-line underline-offset-4 transition-colors hover:decoration-fg"
           >
             Undo
-            <kbd className="font-mono text-xs text-faint no-underline pointer-coarse:hidden">{mod} Z</kbd>
+            <kbd className="text-xs text-faint no-underline pointer-coarse:hidden">{mod} Z</kbd>
           </button>
         </div>
       )}
