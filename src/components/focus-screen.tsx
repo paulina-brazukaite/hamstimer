@@ -75,7 +75,8 @@ export function FocusScreen({ preset, intro }: { preset?: PresetId; intro?: Reac
           // nothing, so a saved task never flashes an empty screen first.
           <div className="flex-1" />
         ) : resuming ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-5 px-6 py-10">
+          // Anchored near the top, not centred: on a tall screen centring left a big empty gap above.
+          <div className="flex flex-1 flex-col items-center gap-5 px-6 pt-4 pb-10 sm:pt-8">
             <HamsterStage pose="sleep" />
             <ResumeCard state={state} now={now} />
           </div>
@@ -105,8 +106,9 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
 
   return (
     <>
-      <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-10">
-        <HamsterStage pose={hamsterPose(state, false)} className="mb-4" />
+      {/* Anchored near the top, not centred, so a tall screen doesn't open a big gap above. */}
+      <div className="flex flex-1 flex-col items-center gap-6 px-6 pt-2 pb-10 sm:pt-6">
+        <HamsterStage pose={hamsterPose(state, false)} className="mb-2" />
         <TaskView state={state} now={now} />
 
         {/* The clock is the frame, not the subject: lighter, smaller, and only at full

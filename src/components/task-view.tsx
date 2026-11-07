@@ -196,13 +196,15 @@ export function Pomodoros({ count, lit }: { count: number; lit: boolean }) {
 }
 
 /**
- * "What are you working on?" Enter adds a line and keeps the cursor here, so
- * you can add several. Space in an empty box starts or pauses the timer, so you
- * never have to leave it. Esc hands the keyboard back to the shortcuts.
+ * "What are you working on?" Enter (or the Add button that appears once you've
+ * typed something) adds a line and keeps the cursor here, so you can add
+ * several. Space in an empty box starts or pauses the timer, so you never have
+ * to leave it. Esc hands the keyboard back to the shortcuts.
  */
 function LineInput({ big, hasLines }: { big: boolean; hasLines: boolean }) {
   const [text, setText] = useState("");
   const ref = useRef<HTMLInputElement>(null);
+  const canAdd = text.trim() !== "";
 
   // Don't steal focus from somewhere else on the page (e.g. the title box).
   useEffect(() => {
@@ -210,8 +212,15 @@ function LineInput({ big, hasLines }: { big: boolean; hasLines: boolean }) {
     if (!a || a === document.body) ref.current?.focus();
   }, []);
 
+  function add() {
+    if (!canAdd) return;
+    update((s, now) => addLine(s, text, now));
+    setText("");
+    ref.current?.focus(); // ready for the next line
+  }
+
   return (
-    <div className={big ? "w-full" : "mt-3 w-full"}>
+    <div className={`relative ${big ? "w-full" : "mt-3 w-full"}`}>
       <input
         ref={ref}
         id={LINE_INPUT_ID}
@@ -222,12 +231,11 @@ function LineInput({ big, hasLines }: { big: boolean; hasLines: boolean }) {
         placeholder={hasLines ? "What's next?" : "What are you working on?"}
         aria-label="Add a line: what you're working on"
         autoComplete="off"
+        enterKeyHint="done"
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            if (!text.trim()) return;
-            update((s, now) => addLine(s, text, now));
-            setText("");
+            add();
           } else if (e.key === " " && text === "") {
             e.preventDefault();
             update(toggle);
@@ -237,10 +245,28 @@ function LineInput({ big, hasLines }: { big: boolean; hasLines: boolean }) {
         }}
         className={
           big
-            ? `block w-full border-b border-line bg-transparent pb-2 text-center leading-snug font-semibold tracking-tight text-fg outline-none placeholder:font-normal placeholder:text-faint focus:border-faint ${LEAD_SIZE}`
-            : "block w-full rounded-xl border border-line bg-transparent px-3.5 py-3 text-[15px] text-fg outline-none placeholder:text-faint focus:border-faint"
+            ? // Equal padding on both sides keeps the centred text centred when the button shows.
+              `block w-full border-b border-line bg-transparent px-20 pb-2 text-center leading-snug font-semibold tracking-tight text-fg outline-none placeholder:font-normal placeholder:text-faint focus:border-faint sm:px-24 ${LEAD_SIZE}`
+            : `block w-full rounded-xl border border-line bg-transparent py-3 pl-3.5 text-[15px] text-fg outline-none placeholder:text-faint focus:border-faint ${canAdd ? "pr-24" : "pr-3.5"}`
         }
       />
+      {canAdd && (
+        <button
+          type="button"
+          aria-label="Add line"
+          // Keep focus (and the phone keyboard) in the input while tapping the button.
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={add}
+          className={`absolute top-1/2 inline-flex min-h-9 -translate-y-1/2 items-center gap-2 rounded-full bg-fg px-4 text-sm font-semibold text-ground transition-opacity hover:opacity-85 ${
+            big ? "right-0" : "right-1.5"
+          }`}
+        >
+          Add
+          <kbd aria-hidden="true" className="text-xs font-normal opacity-60 pointer-coarse:hidden">
+            ↵
+          </kbd>
+        </button>
+      )}
     </div>
   );
 }
