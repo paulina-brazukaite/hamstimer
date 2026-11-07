@@ -245,8 +245,9 @@ function LineInput({ big, hasLines }: { big: boolean; hasLines: boolean }) {
         }}
         className={
           big
-            ? // Equal padding on both sides keeps the centred text centred when the button shows.
-              `block w-full border-b border-line bg-transparent px-20 pb-2 text-center leading-snug font-semibold tracking-tight text-fg outline-none placeholder:font-normal placeholder:text-faint focus:border-faint sm:px-24 ${LEAD_SIZE}`
+            ? // Padding only while the button shows (equal on both sides keeps text centred); otherwise the full width is
+              // free so the placeholder isn't clipped on narrow screens.
+              `block w-full border-b border-line bg-transparent pb-2 text-center leading-snug font-semibold tracking-tight text-fg outline-none placeholder:font-normal placeholder:text-faint focus:border-faint ${canAdd ? "px-[4.5rem] sm:px-24" : "px-0"} ${LEAD_SIZE}`
             : `block w-full rounded-xl border border-line bg-transparent py-3 pl-3.5 text-[15px] text-fg outline-none placeholder:text-faint focus:border-faint ${canAdd ? "pr-24" : "pr-3.5"}`
         }
       />
