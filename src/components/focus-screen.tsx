@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { AppHeader } from "@/components/app-header";
 import { PresetPicker } from "@/components/preset-picker";
 import { ResumeCard } from "@/components/resume-card";
-import { HamsterScene } from "@/components/hamster-scene";
+import { HamsterStage } from "@/components/hamster-stage";
 import { useTabIcon } from "@/components/tab-icon";
 import { hamsterPose } from "@/lib/hamster";
 import { TaskView, focusLineInput } from "@/components/task-view";
@@ -76,7 +76,7 @@ export function FocusScreen({ preset, intro }: { preset?: PresetId; intro?: Reac
           <div className="flex-1" />
         ) : resuming ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-5 px-6 py-10">
-            <HamsterScene pose="sleep" />
+            <HamsterStage pose="sleep" />
             <ResumeCard state={state} now={now} />
           </div>
         ) : (
@@ -106,7 +106,7 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
   return (
     <>
       <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-10">
-        <HamsterScene pose={hamsterPose(state, false)} className="mb-4" />
+        <HamsterStage pose={hamsterPose(state, false)} className="mb-4" />
         <TaskView state={state} now={now} />
 
         {/* The clock is the frame, not the subject: lighter, smaller, and only at full

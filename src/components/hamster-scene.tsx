@@ -14,7 +14,7 @@ export function HamsterScene({ pose, className = "" }: { pose: HamsterPose; clas
       aria-hidden="true"
       focusable="false"
       data-pose={pose}
-      className={`pointer-events-none mx-auto block h-auto w-[150px] select-none sm:w-[180px] ${className}`}
+      className={`pointer-events-none block h-auto w-full select-none ${className}`}
     >
       <line x1="28" y1="102" x2="132" y2="102" className="stroke-line" strokeWidth="1.5" strokeLinecap="round" />
       {POSES[pose]}
