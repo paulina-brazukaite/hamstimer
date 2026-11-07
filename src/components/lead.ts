@@ -1,7 +1,7 @@
 /**
- * Type for the lead line: the one thing to act on (the intention while you work,
- * the next step on the resume card). Long text steps down a size so a
- * 120-character intention doesn't become a wall of bold on a phone.
+ * Type for the lead line: the one thing to act on (the line you're on, on the
+ * resume card). Long text steps down a size so a
+ * 120-character line doesn't become a wall of bold on a phone.
  */
 const BASE = "leading-snug font-semibold tracking-tight break-words text-fg";
 

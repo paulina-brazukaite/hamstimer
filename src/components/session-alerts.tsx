@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { onFocusEnd, subscribe } from "@/lib/timer-store";
 import { readSettings } from "@/lib/settings";
 import { playChime, unlockAudio } from "@/lib/sound";
+import { currentLine } from "@/lib/timer";
 
 /**
  * Renders nothing. Mounted once in the root layout, so on every page it:
@@ -29,7 +30,7 @@ export function SessionAlerts() {
         Notification.permission === "granted"
       ) {
         new Notification("Focus done. Time for a break.", {
-          body: state.intention || undefined,
+          body: currentLine(state)?.text || state.task.title || undefined,
           tag: "nextline-focus-end", // replaces an older one instead of stacking
         });
       }

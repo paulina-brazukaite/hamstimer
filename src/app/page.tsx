@@ -17,8 +17,8 @@ export default function Home() {
         <FirstVisitIntro>
           <h1 className="text-xl font-semibold tracking-tight text-balance text-fg sm:text-2xl">{TAGLINE}</h1>
           <p className="mt-3 text-[15px] leading-relaxed text-pretty text-muted">
-            Write one line about what you&apos;re working on and press Enter. When you pause or stop, note your
-            next step. Next time, Nextline opens on exactly where you left off: one key to resume.
+            Type what you&apos;re working on, press Enter, and start a pomodoro on it. Add the next step as you
+            go. Next time, Nextline opens on exactly where you left off: one key to resume.
           </p>
           <p className="mt-3 font-mono text-xs text-faint">No account · your data stays in this browser</p>
         </FirstVisitIntro>

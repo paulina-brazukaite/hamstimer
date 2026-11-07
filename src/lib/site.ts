@@ -10,4 +10,4 @@ export const SITE_URL =
 export const SITE_NAME = "Nextline";
 export const TAGLINE = "A focus timer that remembers where your head was.";
 export const DESCRIPTION =
-  "Write one line about what you're working on, start the timer, and note your next step when you stop. Next time, pick up exactly where you left off with one key.";
+  "Type what you're working on, press Enter, and run a pomodoro on it. Add the next step as you go. Next time, pick up exactly where you left off with one key.";

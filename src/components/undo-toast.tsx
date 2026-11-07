@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { undoStartFresh } from "@/lib/timer-store";
+import { undoFinishTask } from "@/lib/timer-store";
 import { useModKey } from "@/lib/use-stored";
 
 /**
- * "Started fresh · Undo", shown for a few seconds after Start fresh so a stray
+ * "Task finished · Undo", shown for a few seconds after Finish task so a stray
  * Esc can be taken back. ⌘Z / Ctrl+Z works too, except while you're typing in a
  * box that has text (there it's the box's own undo).
  *
@@ -23,7 +23,7 @@ export function UndoToast({ visible }: { visible: boolean }) {
       if ((t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) && t.value !== "") return;
       if (t?.isContentEditable) return;
       e.preventDefault();
-      undoStartFresh();
+      undoFinishTask();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -33,12 +33,12 @@ export function UndoToast({ visible }: { visible: boolean }) {
     <div role="status" className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
       {visible && (
         <div className="pointer-events-auto flex items-center gap-1 rounded-lg border border-line bg-surface py-1 pr-1 pl-4 text-sm text-muted shadow-card">
-          <span>Started fresh.</span>
+          <span>Task finished.</span>
           <button
             type="button"
-            // Don't take focus from the intention box: its blur would save, which ends the undo.
+            // Don't take focus from a text box: its blur could save, which ends the undo.
             onMouseDown={(e) => e.preventDefault()}
-            onClick={undoStartFresh}
+            onClick={undoFinishTask}
             className="inline-flex min-h-9 items-center gap-2.5 rounded-md px-3 text-fg underline decoration-line underline-offset-4 transition-colors hover:decoration-fg"
           >
             Undo

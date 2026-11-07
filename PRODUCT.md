@@ -16,30 +16,30 @@ Secondary audience, confirmed by the SEO pages: people searching for a specific 
 
 ## Product Purpose
 
-Nextline is a focus timer that remembers where your head was. Before a session you write one line about what you're working on; when you pause or stop you note the very next step; when you return, that note is the first thing you see and one key resumes the session.
+Nextline is a focus timer that remembers where your head was. You type what you're working on and press Enter; that line is what the pomodoro is for. As you go you tick lines off and type the next one, so a task becomes a short list of steps, each with its own pomodoros. When you return, the line you were on is the first thing you see and one key resumes. Finishing a task moves it to History and clears the screen for the next one.
 
-Success means people come back to it and resume from their note instead of starting cold.
+Success means people come back to it and resume from the line they were on instead of starting cold.
 
 ## Positioning
 
-Most timers are good at telling you to stop; Nextline cares about the moment after, coming back to your work and knowing straight away where you were. The resume note and one-key resume are the mechanism; the timer is the frame around them.
+Most timers are good at telling you to stop; Nextline cares about the moment after, coming back to your work and knowing straight away where you were. The current line and one-key resume are the mechanism; the timer is the frame around them.
 
 ## Operating Context
 
 - Used alongside the real work, usually in a browser tab or as an installed app next to an editor, design tool or document.
-- Keyboard is the primary input: ⌘K / Ctrl+K command menu holds every action; Enter starts, Space pauses/resumes, E adds 15 minutes, N writes a note, R resumes, Esc starts fresh.
-- Sessions follow presets: 25/5, 50/10, 90/15, with +15 extension.
+- Keyboard is the primary input: ⌘K / Ctrl+K command menu holds every action; Enter adds a line, Space starts/pauses (also from the empty line input), D ticks the current line done, E adds 15 minutes, A puts the cursor back in the line input; on the resume card R resumes and Esc finishes the task (undoable).
+- Focus blocks follow presets: 25/5, 50/10, 90/15 or custom, with +15 extension. The preset is chosen from the command menu or a /timer page, not on the focus screen.
 - An end-of-focus chime (Web Audio) and optional browser notifications mark the end of a block.
 
 ## Capabilities and Constraints
 
-- No account. All sessions and notes live in the user's own browser (`localStorage`, keys prefixed `nextline:`) and are never sent to a server.
-- History at `/history` with JSON export and import as the user's backup.
+- No account. All tasks and lines live in the user's own browser (`localStorage`, keys prefixed `nextline:`) and are never sent to a server.
+- History at `/history` lists finished tasks with their lines and pomodoros, with JSON export and import as the user's backup.
 - Works offline via a hand-written service worker; installable.
 - Light and dark themes.
 - Public pages: `/` (timer, with a first-visit intro), `/timer/[preset]` landing pages, `/about`, `/blog` (Markdown files behind a swappable `BlogSource`).
 - Stack: Next.js 16, React 19, Tailwind 4, deployed on Vercel.
-- Terminology: "intention" (the one line before a session), "Where was I?" note, "resume card", "next" (the next step).
+- Terminology: "task" (optional title plus its lines), "line" (one thing you typed in: a step), "current line" (the one the timer counts towards), "pomodoro" (a focus block that ran to the end), "resume card", "Finish task". Retired: "intention" and the "Where was I?" note (old saves are converted).
 
 ## Brand Commitments
 
@@ -58,7 +58,7 @@ Most timers are good at telling you to stop; Nextline cares about the moment aft
 ## Product Principles
 
 1. The return matters more than the stop: every surface should make resuming faster.
-2. One line, one key: capturing context and resuming must stay effortless enough to do mid-thought.
+2. One line, one key: adding the next step and resuming must stay effortless enough to do mid-thought.
 3. Your data stays yours: no account, nothing leaves the browser, export is always available.
 4. Stay out of the way of the work: the timer sits beside a maker's real tools and must not compete with them for attention.
 5. Keyboard first: every action is reachable without the mouse.

@@ -2,26 +2,29 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { AppHeader } from "@/components/app-header";
-import { PresetPicker } from "@/components/preset-picker";
-import { IntentionInput } from "@/components/intention-input";
-import { NextNote, NoteBoard } from "@/components/note-board";
+import { CustomLength } from "@/components/preset-picker";
 import { ResumeCard } from "@/components/resume-card";
-import { getSnapshot, update } from "@/lib/timer-store";
+import { TaskView, focusLineInput } from "@/components/task-view";
+import { finishTaskUndoable, getSnapshot, update } from "@/lib/timer-store";
 import { SiteFooter } from "@/components/site-footer";
 import { UndoToast } from "@/components/undo-toast";
-import { leadClass } from "@/components/lead";
 import { useTimer } from "@/lib/use-timer";
 import { useModKey } from "@/lib/use-stored";
 import {
   EXTENSION_MS,
+  PRESETS,
+  canStart,
+  choosePreset,
+  currentLine,
   extend,
-  openNote,
   formatClock,
+  isActive,
   isRunning,
+  keepGoing,
+  markCurrentDone,
   phaseLength,
   progress,
   remaining,
-  choosePreset,
   stop,
   toggle,
   type PresetId,
@@ -30,7 +33,7 @@ import {
 
 /**
  * The app screen: progress line, header, optional intro, then the resume card or
- * the timer. Used by "/" and the /timer/[preset] landing pages.
+ * the task with its timer. Used by "/" and the /timer/[preset] landing pages.
  *
  * `intro` is server-rendered content passed in as a prop, so it's in the HTML for
  * search engines even though this component runs in the browser.
@@ -39,7 +42,7 @@ export function FocusScreen({ preset, intro }: { preset?: PresetId; intro?: Reac
   const snap = useTimer();
   const saved = snap?.state;
   // A landing page like /timer/25-5 shows its preset straight away (no flash of
-  // 50:00), unless a session is in progress. The effect below then saves it.
+  // 50:00), unless a block is in progress. The effect below then saves it.
   const applyPreset = !!(preset && snap && wantsPreset(snap.state, snap.resume, preset));
   const state = applyPreset && saved && preset ? choosePreset(saved, preset) : saved;
   useEffect(() => {
@@ -66,7 +69,7 @@ export function FocusScreen({ preset, intro }: { preset?: PresetId; intro?: Reac
         {intro}
         {!state ? (
           // Before localStorage is read (server render + first client render) we show
-          // nothing, so a saved session never flashes a default "50:00" first.
+          // nothing, so a saved task never flashes an empty screen first.
           <div className="flex-1" />
         ) : resuming ? (
           <div className="flex flex-1 items-center justify-center px-6 py-10">
@@ -84,97 +87,96 @@ export function FocusScreen({ preset, intro }: { preset?: PresetId; intro?: Reac
 }
 
 function wantsPreset(s: TimerState, resume: boolean, preset: PresetId): boolean {
-  return !resume && !s.notePrompt && (s.phase === "idle" || s.phase === "complete") && s.presetId !== preset;
+  return !resume && (s.phase === "idle" || s.phase === "complete") && s.presetId !== preset;
 }
 
 function TimerView({ state, now }: { state: TimerState; now: number }) {
   const { phase } = state;
   const running = isRunning(state);
-  const active = phase === "focus" || phase === "break";
-  const label = state.intention || "Focus";
-  const showIntentionInput = !state.notePrompt && (phase === "idle" || phase === "complete");
+  const active = isActive(state);
+  const hasLines = state.task.lines.length > 0;
+  const current = currentLine(state);
+  const startable = canStart(state);
   const mod = useModKey();
+  const presetLabel = PRESETS.find((p) => p.id === state.presetId)?.label;
 
   return (
     <>
-      <div className="flex flex-1 flex-col items-center justify-center gap-5 px-6 py-10">
-        {showIntentionInput ? (
-          // `key` remounts the input (fresh defaultValue + autofocus) when a session ends.
-          <IntentionInput key={state.sessionStartedAt ?? 0} value={state.intention} />
-        ) : (
-          // The lead line: what you're doing. On break it steps back so the break reads as rest.
-          <p
-            className={
-              phase === "break"
-                ? "max-w-xl text-center text-[17px] text-balance break-words text-muted"
-                : `max-w-xl text-center ${leadClass(label)}`
-            }
-          >
-            {phase === "break" ? `Break · ${label}` : label}
-          </p>
-        )}
-
-        {/* Right under what you're doing: the next step. */}
-        {!state.notePrompt && <NextNote note={state.note} />}
+      <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-10">
+        <TaskView state={state} now={now} />
 
         {/* The clock is the frame, not the subject: lighter, smaller, and only at full
             strength while it's actually running (so paused looks paused). */}
-        <p
-          className={`mt-3 font-mono text-6xl leading-none font-light tracking-tighter tabular-nums sm:text-[88px] ${
-            running ? "text-fg" : "text-muted"
-          }`}
-          role="timer"
-          aria-live="off"
-        >
-          {formatClock(remaining(state, now))}
-        </p>
-
-        <p className="min-h-5 font-mono text-[13px] text-faint">
-          {phase === "focus" && (
-            <>
-              of {formatClock(phaseLength(state))}
-              {state.extensions > 0 && ` · +${(state.extensions * EXTENSION_MS) / 60_000} min`}
-              {!running && " · paused"}
-            </>
-          )}
-          {phase === "break" && (
-            <>
-              {formatClock(state.breakMs)} break{!running && " · paused"} · E for 15 more minutes
-            </>
-          )}
-          {phase === "complete" && "Session over. Nice work."}
-        </p>
-
-        {state.notePrompt && <NoteBoard prompt={state.notePrompt} previous={state.note} />}
-
-        {showIntentionInput && <PresetPicker state={state} />}
-
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => update(toggle)}
-            className="min-h-10 rounded-lg border border-line bg-surface px-5 text-sm transition-colors hover:border-faint"
+        <div className="mt-2 flex flex-col items-center gap-3">
+          <p
+            className={`font-mono text-5xl leading-none font-light tracking-tighter tabular-nums sm:text-7xl ${
+              running ? "text-fg" : "text-muted"
+            }`}
+            role="timer"
+            aria-live="off"
           >
-            {running ? "Pause" : active ? "Resume" : phase === "complete" ? "Start another" : "Start"}
-          </button>
-          {active && (
-            <button
-              type="button"
-              onClick={() => update(stop)}
-              className="min-h-10 rounded-lg px-4 text-sm text-muted transition-colors hover:text-fg"
-            >
-              Stop
-            </button>
+            {formatClock(remaining(state, now))}
+          </p>
+
+          <p className="min-h-5 text-center font-mono text-[13px] text-faint">
+            {phase === "focus" && (
+              <>
+                of {formatClock(phaseLength(state))}
+                {state.extensions > 0 && ` · +${(state.extensions * EXTENSION_MS) / 60_000} min`}
+                {!running && " · paused"}
+              </>
+            )}
+            {phase === "break" && (
+              <>
+                {formatClock(state.breakMs)} break{!running && " · paused"} · E for 15 more minutes
+              </>
+            )}
+            {phase === "idle" &&
+              (presetLabel ? `${presetLabel} · ${mod} K to change` : `${state.focusMs / 60_000} / ${state.breakMs / 60_000}`)}
+            {phase === "complete" && (startable ? "Break over. Space for the next one." : "All done. Add a line, or finish the task.")}
+          </p>
+
+          {state.presetId === "custom" && !active && <CustomLength state={state} />}
+
+          {hasLines && (
+            <div className="flex flex-wrap justify-center gap-3">
+              {(active || startable) && (
+                <button
+                  type="button"
+                  onClick={() => update(toggle)}
+                  className="min-h-10 rounded-lg border border-line bg-surface px-5 text-sm transition-colors hover:border-faint"
+                >
+                  {running ? "Pause" : active ? "Resume" : "Start"}
+                </button>
+              )}
+              {active && (
+                <button
+                  type="button"
+                  onClick={() => update(stop)}
+                  className="min-h-10 rounded-lg px-4 text-sm text-muted transition-colors hover:text-fg"
+                >
+                  Stop
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={finishTaskUndoable}
+                className="min-h-10 rounded-lg px-4 text-sm text-muted transition-colors hover:text-fg"
+              >
+                Finish task
+              </button>
+            </div>
           )}
         </div>
       </div>
 
       {/* Key hints: pointless on a touch screen, so hidden there. */}
-      <div className="flex flex-wrap justify-center gap-7 px-6 pb-8 font-mono text-xs text-faint pointer-coarse:hidden">
-        {showIntentionInput && <Hint k="Enter" label="start" />}
-        {active && !state.notePrompt && <Hint k="Space" label={running ? "pause" : "resume"} />}
+      <div className="flex flex-wrap justify-center gap-x-7 gap-y-2 px-6 pb-8 font-mono text-xs text-faint pointer-coarse:hidden">
+        <Hint k="Enter" label="add line" />
+        {(active || startable) && <Hint k="Space" label={running ? "pause" : active ? "resume" : "start"} />}
+        {current && <Hint k="D" label="done" />}
         {active && <Hint k="E" label="+15 min" />}
-        {phase !== "idle" && !state.notePrompt && <Hint k="N" label="note" />}
+        {hasLines && <Hint k="A" label="type" />}
         <Hint k={`${mod} K`} label="menu" />
       </div>
     </>
@@ -190,16 +192,15 @@ function Hint({ k, label }: { k: string; label: string }) {
 }
 
 /**
- * Tab title, e.g. "23:14 · Fix token refresh". Changing document.title is a side
- * effect, so it lives in useEffect, which runs after React renders.
- * (A custom hook is just a function starting with "use" that calls other hooks.)
- * With no session going, the page's own title (from its metadata) is put back.
+ * Tab title, e.g. "23:14 · Write the refresh handler". Changing document.title is
+ * a side effect, so it lives in useEffect, which runs after React renders.
+ * With nothing going on, the page's own title (from its metadata) is put back.
  */
 function useDocumentTitle(state: TimerState | undefined, now: number, resuming: boolean) {
   const pageTitle = useRef<string | null>(null); // a value that survives re-renders, like a field
   let title: string | null = null;
   if (state) {
-    const label = state.intention || "Focus";
+    const label = currentLine(state)?.text || state.task.title || "Focus";
     const clock = formatClock(remaining(state, now));
     if (resuming) title = `Resume · ${label}`;
     else if (state.phase === "focus") title = `${clock} · ${label}${isRunning(state) ? "" : " (paused)"}`;
@@ -212,12 +213,17 @@ function useDocumentTitle(state: TimerState | undefined, now: number, resuming: 
   }, [title]);
 }
 
-/** Space start/pause, E +15 min, N note. Registered once; handlers call the store directly. */
+/**
+ * Space start/pause, D done, E +15 min, A back to typing, Esc "still on it".
+ * Registered once; handlers call the store directly. Inside a text box the
+ * box's own keys win (the line input handles Space itself when it's empty).
+ */
 function useTimerShortcuts() {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
-      if (getSnapshot()?.resume) return; // the resume card handles its own keys
+      const snap = getSnapshot();
+      if (!snap || snap.resume) return; // the resume card handles its own keys
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
 
@@ -226,9 +232,20 @@ function useTimerShortcuts() {
         update(toggle);
       } else if (e.key === "e" || e.key === "E") {
         update(extend);
-      } else if (e.key === "n" || e.key === "N") {
-        e.preventDefault(); // don't type the "n" into the note box that opens
-        update(openNote);
+      } else if (e.key === "d" || e.key === "D") {
+        // The line input can take focus during this key press (it replaces the
+        // question), so stop the "d" from being typed into it.
+        e.preventDefault();
+        const asked = snap.state.askDone;
+        update(markCurrentDone);
+        if (asked) requestAnimationFrame(focusLineInput);
+      } else if (e.key === "a" || e.key === "A") {
+        e.preventDefault(); // don't type the "a" into the box that gets focus
+        focusLineInput();
+      } else if (e.key === "Escape" && snap.state.askDone) {
+        e.preventDefault();
+        update(keepGoing);
+        requestAnimationFrame(focusLineInput);
       }
     }
     window.addEventListener("keydown", onKey);

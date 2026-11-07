@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { startFreshUndoable, update } from "@/lib/timer-store";
+import { finishTaskUndoable, update } from "@/lib/timer-store";
+import { focusLineInput } from "@/components/task-view";
 import { useTimer } from "@/lib/use-timer";
 import { useSettings } from "@/lib/use-stored";
 import { setNotifications, updateSettings } from "@/lib/settings";
@@ -11,10 +12,12 @@ import { playChime } from "@/lib/sound";
 import { exportBackup, pickBackupFile } from "@/lib/backup-actions";
 import {
   PRESETS,
+  canStart,
   choosePreset,
+  currentLine,
   extend,
   isRunning,
-  openNote,
+  markCurrentDone,
   pause,
   resumeSession,
   start,
@@ -171,6 +174,8 @@ function useCommands(): Command[] {
   const phase = state?.phase ?? "idle";
   const active = phase === "focus" || phase === "break";
   const running = state ? isRunning(state) : false;
+  const startable = state ? canStart(state) : false;
+  const hasLines = (state?.task.lines.length ?? 0) > 0;
   const goTimer = () => {
     if (pathname !== "/") router.push("/");
   };
@@ -178,23 +183,25 @@ function useCommands(): Command[] {
   const add = (group: string, label: string, run: () => void, keys?: string) =>
     list.push({ id: `${group}:${label}`, group, label, run, keys });
 
-  // Timer
+  // Timer and task
   if (snap?.resume) {
     add("Timer", "Resume where you left off", () => update(resumeSession), "R");
-    add("Timer", "Start fresh", startFreshUndoable, "Esc");
+    add("Task", "Finish task", finishTaskUndoable, "Esc");
   } else {
-    if (!active) add("Timer", "Start session", () => {
+    if (!active && startable) add("Timer", "Start focus", () => {
         update(start);
         goTimer();
       }, "Space");
     if (running) add("Timer", "Pause", () => update(pause), "Space");
     if (active && !running) add("Timer", "Resume", () => update(start), "Space");
     if (active) add("Timer", "Add 15 minutes", () => update(extend), "E");
-    if (phase !== "idle") add("Timer", "Write a note", () => {
-        update(openNote);
+    if (active) add("Timer", "Stop", () => update(stop));
+    add("Task", "Add a line", () => {
         goTimer();
-      }, "N");
-    if (active) add("Timer", "Stop session", () => update(stop));
+        requestAnimationFrame(focusLineInput);
+      }, "A");
+    if (state && currentLine(state)) add("Task", "Mark current line done", () => update(markCurrentDone), "D");
+    if (hasLines) add("Task", "Finish task", finishTaskUndoable);
   }
   if (!active) {
     for (const p of PRESETS) {

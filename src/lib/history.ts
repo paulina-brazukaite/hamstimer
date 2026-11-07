@@ -1,70 +1,73 @@
-// Session history and backups. Pure functions, no browser APIs, so they're testable.
+// History (finished tasks) and backups. Pure functions, no browser APIs, so they're testable.
 
-import type { TimerState } from "./timer";
+import { parseTask, taskFromV1, type Line, type Task } from "./timer";
 
+/** A finished task. */
 export interface HistoryEntry {
-  /** The session's start timestamp doubles as its id. */
+  /** The task's id (when its first line was added). */
   id: number;
-  intention: string;
+  title: string;
+  lines: Line[];
+  /** All focus time across the lines. */
   focusedMs: number;
-  note: string;
   startedAt: number;
-  /** When you last stepped away (paused, stopped, focus ended). */
+  /** When "Finish task" was pressed. */
   endedAt: number;
 }
 
-const MIN_RECORDED_MS = 60_000; // ignore sessions started by accident
 const MAX_ENTRIES = 1000;
 
-/**
- * Insert or update the entry for the timer's current session. Called whenever
- * the timer is saved; returns the same array when there's nothing to change,
- * so the caller can skip writing.
- *
- * Short sessions are skipped as accidental, unless they have a note: a written
- * next step is never an accident, and keeping it here means "Start fresh" can't
- * make it disappear for good.
- */
-export function recordSession(history: HistoryEntry[], s: TimerState): HistoryEntry[] {
-  if (s.sessionStartedAt === null || s.leftAt === null) return history;
-  if (s.focusedMs < MIN_RECORDED_MS && !s.note) return history;
-
-  const entry: HistoryEntry = {
-    id: s.sessionStartedAt,
-    intention: s.intention,
-    focusedMs: s.focusedMs,
-    note: s.note,
-    startedAt: s.sessionStartedAt,
-    endedAt: s.leftAt,
+export function entryFromTask(task: Task, now: number): HistoryEntry {
+  return {
+    id: task.id,
+    title: task.title,
+    lines: task.lines,
+    focusedMs: task.lines.reduce((sum, l) => sum + l.focusedMs, 0),
+    startedAt: task.id,
+    endedAt: now,
   };
-
-  const i = history.findIndex((h) => h.id === entry.id);
-  if (i === -1) return [entry, ...history].slice(0, MAX_ENTRIES); // newest first
-  if (sameEntry(history[i], entry)) return history;
-  const next = history.slice();
-  next[i] = entry;
-  return next;
 }
 
-function sameEntry(a: HistoryEntry, b: HistoryEntry): boolean {
-  return (
-    a.intention === b.intention && a.focusedMs === b.focusedMs && a.note === b.note && a.endedAt === b.endedAt
-  );
+/**
+ * Add a finished task, newest first. An entry with the same id is replaced (a
+ * session saved before tasks existed shares its id with the task it became).
+ */
+export function recordTask(history: HistoryEntry[], entry: HistoryEntry): HistoryEntry[] {
+  return [entry, ...history.filter((h) => h.id !== entry.id)].slice(0, MAX_ENTRIES);
 }
 
+export function pomodoroCount(entry: { lines: Line[] }): number {
+  return entry.lines.reduce((sum, l) => sum + l.pomodoros, 0);
+}
+
+/**
+ * Reads stored history and drops junk. Entries from before tasks existed (one
+ * session with an intention and a note) are converted to a task with one line.
+ */
 export function parseHistory(raw: unknown): HistoryEntry[] {
   if (!Array.isArray(raw)) return [];
-  return raw.filter(
-    (h): h is HistoryEntry =>
-      typeof h === "object" &&
-      h !== null &&
-      typeof h.id === "number" &&
-      typeof h.intention === "string" &&
-      typeof h.focusedMs === "number" &&
-      typeof h.note === "string" &&
-      typeof h.startedAt === "number" &&
-      typeof h.endedAt === "number",
-  );
+  const out: HistoryEntry[] = [];
+  for (const h of raw) {
+    if (typeof h !== "object" || h === null) continue;
+    const e = h as Record<string, unknown>;
+    if (
+      typeof e.id !== "number" ||
+      typeof e.focusedMs !== "number" ||
+      typeof e.startedAt !== "number" ||
+      typeof e.endedAt !== "number"
+    ) {
+      continue;
+    }
+    const base = { id: e.id, focusedMs: e.focusedMs, startedAt: e.startedAt, endedAt: e.endedAt };
+    if (Array.isArray(e.lines) && typeof e.title === "string") {
+      const task = parseTask({ id: e.id, title: e.title, lines: e.lines, currentId: null });
+      if (task) out.push({ ...base, title: task.title, lines: task.lines });
+    } else if (typeof e.intention === "string") {
+      const task = taskFromV1(e.id, e.intention, typeof e.note === "string" ? e.note : "", e.focusedMs);
+      out.push({ ...base, title: task.title, lines: task.lines });
+    }
+  }
+  return out;
 }
 
 /** "38 min", "1 h 15 min". */
@@ -110,7 +113,11 @@ export function createBackup(store: KeyValueStore, now: Date): Backup {
   return { app: "nextline", version: 1, exportedAt: now.toISOString(), data };
 }
 
-/** Throws an Error with a human-readable message if the file isn't a Nextline backup. */
+/**
+ * Throws an Error with a human-readable message if the file isn't a Nextline backup.
+ * The backup format itself hasn't changed: the timer and history inside it are
+ * converted when they're read, so backups from before tasks still import.
+ */
 export function parseBackup(text: string): Backup {
   let raw: unknown;
   try {

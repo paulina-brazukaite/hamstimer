@@ -4,7 +4,8 @@ import { useMemo, useRef, useState } from "react";
 import { AppHeader } from "@/components/app-header";
 import { KEYS } from "@/lib/storage";
 import { useStoredRaw } from "@/lib/use-stored";
-import { formatDuration, parseHistory, type HistoryEntry } from "@/lib/history";
+import { formatDuration, parseHistory, pomodoroCount, type HistoryEntry } from "@/lib/history";
+import { Pomodoros } from "@/components/task-view";
 import { exportBackup, importBackupFile } from "@/lib/backup-actions";
 
 const button =
@@ -56,8 +57,8 @@ export function HistoryScreen() {
 
         {raw === undefined ? null : entries.length === 0 ? (
           <p className="mt-10 text-muted">
-            No sessions yet. Once you&apos;ve focused for a minute (or left a note) and paused, stopped or finished,
-            it shows up here.
+            No finished tasks yet. When you press Finish task, the task shows up here with its lines and
+            pomodoros.
           </p>
         ) : (
           <ol className="mt-6 border-t border-line-soft">
@@ -72,14 +73,37 @@ export function HistoryScreen() {
 }
 
 function HistoryRow({ entry }: { entry: HistoryEntry }) {
+  const pomodoros = pomodoroCount(entry);
   return (
-    <li className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 border-b border-line-soft py-4">
-      <p className="text-[15px] text-fg">{entry.intention || "Untitled session"}</p>
-      <p className="text-right font-mono text-[13px] text-muted tabular-nums">{formatDuration(entry.focusedMs)}</p>
-      <p className="text-sm text-muted">{entry.note && <>↳ {entry.note}</>}</p>
-      <p className="text-right font-mono text-xs whitespace-nowrap text-faint">
-        <time dateTime={new Date(entry.endedAt).toISOString()}>{formatWhen(entry.endedAt)}</time>
-      </p>
+    <li className="border-b border-line-soft py-5">
+      <div className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1">
+        <p className="text-[15px] font-medium text-fg">{entry.title || entry.lines[0]?.text || "Untitled task"}</p>
+        <p className="text-right font-mono text-[13px] text-muted tabular-nums">{formatDuration(entry.focusedMs)}</p>
+        <p className="font-mono text-xs text-faint">
+          {entry.lines.length} {entry.lines.length === 1 ? "line" : "lines"}
+          {pomodoros > 0 && ` · ${pomodoros} pomodoro${pomodoros === 1 ? "" : "s"}`}
+        </p>
+        <p className="text-right font-mono text-xs whitespace-nowrap text-faint">
+          <time dateTime={new Date(entry.endedAt).toISOString()}>{formatWhen(entry.endedAt)}</time>
+        </p>
+      </div>
+      {/* An untitled one-line task already shows its line as the heading. */}
+      {(entry.title || entry.lines.length > 1) && (
+      <ul className="mt-3 flex flex-col gap-1.5">
+        {entry.lines.map((l) => (
+          <li key={l.id} className="flex items-center gap-3 text-sm">
+            <span aria-hidden="true" className="w-3 flex-none font-mono text-xs text-faint">
+              {l.doneAt !== null ? "✓" : "·"}
+            </span>
+            <span className={`min-w-0 flex-1 break-words ${l.doneAt !== null ? "text-muted" : "text-faint"}`}>
+              {l.text}
+              {l.doneAt === null && <span className="sr-only"> (not done)</span>}
+            </span>
+            <Pomodoros count={l.pomodoros} lit={false} />
+          </li>
+        ))}
+      </ul>
+      )}
     </li>
   );
 }

@@ -1,59 +1,77 @@
 import { describe, expect, it } from "vitest";
-import { createBackup, formatDuration, parseBackup, parseHistory, recordSession, type KeyValueStore } from "./history";
-import { createTimer, pause, saveNote, setIntention, start, stop, tick } from "./timer";
+import {
+  createBackup,
+  entryFromTask,
+  formatDuration,
+  parseBackup,
+  parseHistory,
+  pomodoroCount,
+  recordTask,
+  type KeyValueStore,
+} from "./history";
+import { addLine, createTimer, finishTask, markCurrentDone, start, tick } from "./timer";
 
 const MIN = 60_000;
 const T0 = 1_700_000_000_000;
 
-describe("recording sessions", () => {
-  const s0 = setIntention(createTimer("50-10"), "Fix token refresh");
+function finished(title: string, at: number) {
+  let s = addLine(createTimer("25-5"), "Read the old middleware", at);
+  s = { ...s, task: { ...s.task, title } };
+  s = tick(start(s, at), at + 26 * MIN); // one pomodoro
+  s = markCurrentDone(s, at + 26 * MIN);
+  s = addLine(s, "Tests for expiry", at + 30 * MIN);
+  return entryFromTask(finishTask(s, at + 40 * MIN).finished!, at + 40 * MIN);
+}
 
-  it("records nothing until you step away, or for under a minute", () => {
-    expect(recordSession([], start(s0, T0))).toEqual([]);
-    expect(recordSession([], pause(start(s0, T0), T0 + 30_000))).toEqual([]);
+describe("finished tasks", () => {
+  it("keep their lines, pomodoros and total focus time", () => {
+    const e = finished("Rewrite auth flow", T0);
+    expect(e).toMatchObject({ id: T0, title: "Rewrite auth flow", startedAt: T0, endedAt: T0 + 40 * MIN });
+    expect(e.lines.map((l) => [l.text, l.doneAt !== null, l.pomodoros])).toEqual([
+      ["Read the old middleware", true, 1],
+      ["Tests for expiry", false, 0],
+    ]);
+    expect(e.focusedMs).toBe(25 * MIN);
+    expect(pomodoroCount(e)).toBe(1);
   });
 
-  it("keeps a short session once it has a note, so starting fresh can't lose it", () => {
-    const s = saveNote(pause(start(s0, T0), T0 + 30_000), "check the retry header");
-    const h = recordSession([], s);
-    expect(h).toHaveLength(1);
-    expect(h[0]).toMatchObject({ id: T0, note: "check the retry header", focusedMs: 30_000 });
+  it("go first, and replace an entry with the same id", () => {
+    const a = finished("First", T0);
+    const b = finished("Second", T0 + 60 * MIN);
+    let h = recordTask(recordTask([], a), b);
+    expect(h.map((e) => e.title)).toEqual(["Second", "First"]);
+    h = recordTask(h, { ...a, title: "First, again" });
+    expect(h.map((e) => e.title)).toEqual(["First, again", "Second"]);
   });
 
-  it("adds an entry on pause and updates the same entry later", () => {
-    let s = pause(start(s0, T0), T0 + 20 * MIN);
-    let h = recordSession([], s);
-    expect(h).toHaveLength(1);
-    expect(h[0]).toMatchObject({ id: T0, intention: "Fix token refresh", focusedMs: 20 * MIN, endedAt: T0 + 20 * MIN });
-
-    s = saveNote(s, "write the test");
-    h = recordSession(h, s);
-    expect(h[0].note).toBe("write the test");
-
-    s = tick(start(s, T0 + 30 * MIN), T0 + 70 * MIN); // resume, focus runs out
-    h = recordSession(h, s);
-    expect(h).toHaveLength(1);
-    expect(h[0].focusedMs).toBe(50 * MIN);
-  });
-
-  it("returns the same array when nothing changed (so we skip a write)", () => {
-    const s = stop(start(s0, T0), T0 + 10 * MIN);
-    const h = recordSession([], s);
-    expect(recordSession(h, s)).toBe(h);
-  });
-
-  it("puts new sessions first", () => {
-    const a = stop(start(s0, T0), T0 + 10 * MIN);
-    const b = stop(start(setIntention(createTimer(), "Second"), T0 + 60 * MIN), T0 + 70 * MIN);
-    const h = recordSession(recordSession([], a), b);
-    expect(h.map((e) => e.intention)).toEqual(["Second", "Fix token refresh"]);
+  it("round-trip through JSON", () => {
+    const h = [finished("Rewrite auth flow", T0)];
+    expect(parseHistory(JSON.parse(JSON.stringify(h)))).toEqual(h);
   });
 
   it("drops junk when loading", () => {
     expect(parseHistory(null)).toEqual([]);
     expect(parseHistory([{ id: 1 }, "x"])).toEqual([]);
   });
+});
 
+describe("sessions saved before tasks", () => {
+  const old = { id: T0, intention: "Fix token refresh", focusedMs: 20 * MIN, note: "", startedAt: T0, endedAt: T0 + 20 * MIN };
+
+  it("become a task with the intention as its line", () => {
+    const [e] = parseHistory([old]);
+    expect(e).toMatchObject({ id: T0, title: "", focusedMs: 20 * MIN, endedAt: T0 + 20 * MIN });
+    expect(e.lines).toEqual([{ id: T0, text: "Fix token refresh", doneAt: null, pomodoros: 0, focusedMs: 20 * MIN }]);
+  });
+
+  it("with a note, the intention names the task and the note is the line", () => {
+    const [e] = parseHistory([{ ...old, note: "check the retry header" }]);
+    expect(e.title).toBe("Fix token refresh");
+    expect(e.lines.map((l) => l.text)).toEqual(["check the retry header"]);
+  });
+});
+
+describe("formatting", () => {
   it("formats durations", () => {
     expect(formatDuration(38 * MIN)).toBe("38 min");
     expect(formatDuration(60 * MIN)).toBe("1 h");

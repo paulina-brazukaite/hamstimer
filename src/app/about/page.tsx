@@ -24,9 +24,9 @@ export default function AboutPage() {
               your work and knowing straight away where you were.
             </p>
             <p>
-              Before you start, write one line about what you&apos;re doing. When you pause or stop, note the very
-              next step. When you return, that note is the first thing you see, and one key picks the session
-              back up.
+              Type what you&apos;re working on and press Enter, then run a pomodoro on it. Add the next step as you
+              go, and tick lines off as you finish them. When you return, the line you were on is the first thing
+              you see, and one key picks it back up.
             </p>
           </div>
 
@@ -37,7 +37,7 @@ export default function AboutPage() {
 
           <h2 className="mt-12 text-lg font-semibold tracking-tight text-fg">Your data</h2>
           <p className="mt-3 text-[17px] leading-relaxed text-muted">
-            There&apos;s no account. Your sessions and notes are stored in your own browser and never sent to us.
+            There&apos;s no account. Your tasks and their steps are stored in your own browser and never sent to us.
             You can download everything as a file from{" "}
             <Link href="/history" className="text-fg underline decoration-line underline-offset-4 hover:decoration-fg">
               History
