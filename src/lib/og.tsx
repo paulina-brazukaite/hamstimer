@@ -48,7 +48,7 @@ export async function renderOg({ title, clock, eyebrow }: { title: string; clock
 
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div style={{ width: 18, height: 18, borderRadius: 9, background: "#e9a84c" }} />
-          <div style={{ fontSize: 34, fontWeight: 600 }}>Nextline</div>
+          <div style={{ fontSize: 34, fontWeight: 600 }}>Hamstimer</div>
         </div>
 
         <div style={{ display: "flex", flex: 1, flexDirection: "column", justifyContent: "center" }}>

@@ -1,4 +1,4 @@
-# Nextline
+# Hamstimer
 
 A focus timer that remembers where your head was.
 

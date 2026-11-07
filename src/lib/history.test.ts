@@ -101,7 +101,7 @@ describe("backups", () => {
 
   it("rejects files that aren't backups, and strips foreign keys", () => {
     expect(() => parseBackup("not json")).toThrow(/valid JSON/);
-    expect(() => parseBackup('{"hello":1}')).toThrow(/Nextline backup/);
+    expect(() => parseBackup('{"hello":1}')).toThrow(/Hamstimer backup/);
     expect(() => parseBackup('{"app":"nextline","version":9,"data":{}}')).toThrow(/newer version/);
     const b = parseBackup('{"app":"nextline","version":1,"data":{"nextline:a":1,"evil":2}}');
     expect(b.data).toEqual({ "nextline:a": 1 });

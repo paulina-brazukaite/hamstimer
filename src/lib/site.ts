@@ -7,7 +7,7 @@ export const SITE_URL =
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : "http://localhost:3000");
 
-export const SITE_NAME = "Nextline";
+export const SITE_NAME = "Hamstimer";
 export const TAGLINE = "A focus timer that remembers where your head was.";
 export const DESCRIPTION =
   "Type what you're working on, press Enter, and run a pomodoro on it. Add the next step as you go. Next time, pick up exactly where you left off with one key.";

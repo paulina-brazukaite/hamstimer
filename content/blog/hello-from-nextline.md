@@ -1,5 +1,5 @@
 ---
-title: "Hello from Nextline (placeholder post)"
+title: "Hello from Hamstimer (placeholder post)"
 description: "A placeholder post that shows how the blog works. Replace or delete it before launch."
 date: "2026-11-06"
 ---

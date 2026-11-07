@@ -1,4 +1,4 @@
-// Nextline service worker: makes the app work offline.
+// Hamstimer service worker: makes the app work offline.
 //
 // Everything the app needs lives in the browser (localStorage), so offline only
 // means "serve the pages and their JS/CSS/fonts from a cache".
@@ -10,7 +10,7 @@
 // Bump VERSION to throw away old caches.
 
 const VERSION = "v2";
-const CACHE = `nextline-${VERSION}`;
+const CACHE = `hamstimer-${VERSION}`;
 const PAGES = ["/", "/history"];
 
 self.addEventListener("install", (event) => {
@@ -21,7 +21,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
-      await Promise.all(keys.filter((k) => k.startsWith("nextline-") && k !== CACHE).map((k) => caches.delete(k)));
+      await Promise.all(keys.filter((k) => (k.startsWith("nextline-") || k.startsWith("hamstimer-")) && k !== CACHE).map((k) => caches.delete(k)));
       await self.clients.claim(); // control open tabs right away
     })(),
   );

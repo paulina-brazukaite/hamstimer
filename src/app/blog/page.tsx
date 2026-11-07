@@ -7,7 +7,7 @@ import { formatPostDate } from "@/lib/blog/format";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Notes on focus, breaks and picking work back up, from the people who make Nextline.",
+  description: "Notes on focus, breaks and picking work back up, from the people who make Hamstimer.",
   alternates: { canonical: "/blog" },
   openGraph: { url: "/blog" },
 };

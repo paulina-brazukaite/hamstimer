@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Nextline is a small focus timer that remembers where your head was.",
+  description: "Hamstimer is a small focus timer that remembers where your head was.",
   alternates: { canonical: "/about" },
   openGraph: { url: "/about" },
 };
@@ -16,11 +16,11 @@ export default function AboutPage() {
       <div className="flex min-h-svh flex-col">
         <AppHeader links={[{ href: "/", label: "Timer" }]} />
         <main className="mx-auto w-full max-w-xl flex-1 px-6 py-14 sm:py-20">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">About Nextline</h1>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">About Hamstimer</h1>
 
           <div className="mt-6 space-y-4 text-[17px] leading-relaxed text-pretty text-muted">
             <p>
-              Most timers are good at telling you to stop. Nextline cares about the moment after: coming back to
+              Most timers are good at telling you to stop. Hamstimer cares about the moment after: coming back to
               your work and knowing straight away where you were.
             </p>
             <p>
