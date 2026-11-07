@@ -6,7 +6,7 @@ import { openCommandMenu } from "@/components/command-menu";
 import { useModKey } from "@/lib/use-stored";
 
 const navLink =
-  "inline-flex min-h-10 items-center rounded-full px-2 text-sm sm:px-3.5 font-medium text-muted transition-colors hover:text-fg";
+  "inline-flex min-h-10 items-center rounded-full px-2 text-sm max-[350px]:px-1.5 sm:px-3.5 font-medium text-muted transition-colors hover:text-fg";
 
 /** Logo (links home), nav links, the ⌘K menu button, theme toggle. Used on every app screen. */
 export function AppHeader({ links = [] }: { links?: { href: string; label: string }[] }) {
