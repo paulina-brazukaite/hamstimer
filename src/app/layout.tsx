@@ -5,6 +5,7 @@ import { Suspense } from "react";
 // asks Google for it, so it still works offline once the PWA is installed.
 import { Schibsted_Grotesk } from "next/font/google";
 import { GeistMono } from "geist/font/mono";
+import { Analytics } from "@vercel/analytics/next";
 import { KEYS } from "@/lib/storage";
 import { DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import { InlineScript } from "@/components/inline-script";
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Suspense fallback={null}>
           <CommandMenu />
         </Suspense>
+        <Analytics />
       </body>
     </html>
   );
