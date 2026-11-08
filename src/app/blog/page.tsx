@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AppHeader } from "@/components/app-header";
 import { SiteFooter } from "@/components/site-footer";
+import { SoroBlog } from "@/components/soro-blog";
 import { blog } from "@/lib/blog";
 import { formatPostDate } from "@/lib/blog/format";
 
@@ -42,6 +43,7 @@ export default async function BlogIndex() {
               ))}
             </ol>
           )}
+          <SoroBlog className="mt-10" />
         </main>
       </div>
       <SiteFooter />
