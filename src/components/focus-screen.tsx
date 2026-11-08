@@ -143,7 +143,8 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
 
           {!active && <PresetPicker state={state} />}
 
-          {hasLines && (
+          {/* Active with no lines: the only line was removed mid-block, and the clock still needs its controls. */}
+          {(hasLines || active) && (
             <div className="flex flex-wrap justify-center gap-2 pt-2">
               {(active || startable) && (
                 <button
@@ -163,13 +164,15 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
                   Stop
                 </button>
               )}
-              <button
-                type="button"
-                onClick={finishTaskUndoable}
-                className="min-h-11 rounded-full px-4 text-[15px] text-muted transition-colors hover:text-fg"
-              >
-                Finish task
-              </button>
+              {hasLines && (
+                <button
+                  type="button"
+                  onClick={finishTaskUndoable}
+                  className="min-h-11 rounded-full px-4 text-[15px] text-muted transition-colors hover:text-fg"
+                >
+                  Finish task
+                </button>
+              )}
             </div>
           )}
         </div>

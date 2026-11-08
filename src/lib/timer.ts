@@ -207,7 +207,7 @@ export function tick(s: TimerState, now: number): TimerState {
         leftAt: endsAt,
       };
     } else {
-      next = { ...next, phase: "complete", elapsedMs: 0, startedAt: null };
+      next = hasNoLines(next) ? cleared(next) : { ...next, phase: "complete", elapsedMs: 0, startedAt: null };
     }
   }
   return next;
@@ -235,9 +235,10 @@ export function pause(s: TimerState, now: number): TimerState {
   return { ...c, elapsedMs: phaseElapsed(s, now), startedAt: null, leftAt: now };
 }
 
-/** End the block early. The lines stay; the next Space starts a new block. */
+/** End the block early. The lines stay; the next Space starts a new block. With no lines, back to a clean start. */
 export function stop(s: TimerState, now: number): TimerState {
   if (!isActive(s)) return s;
+  if (hasNoLines(s)) return cleared(s);
   const c = credit(s, now);
   return { ...c, phase: "complete", startedAt: null, elapsedMs: 0, creditedMs: 0, leftAt: now };
 }
@@ -275,6 +276,15 @@ export function extend(s: TimerState, now: number): TimerState {
 export function reset(s: TimerState): TimerState {
   const base = createTimer(s.presetId, (s.focusMs - s.extensions * EXTENSION_MS) / MINUTE, s.breakMs / MINUTE);
   return { ...base, task: s.task, askDone: s.askDone, leftAt: s.leftAt };
+}
+
+function hasNoLines(s: TimerState): boolean {
+  return s.task.lines.length === 0;
+}
+
+/** Idle with an empty task, keeping only the preset and durations (extensions dropped). */
+function cleared(s: TimerState): TimerState {
+  return createTimer(s.presetId, (s.focusMs - s.extensions * EXTENSION_MS) / MINUTE, s.breakMs / MINUTE);
 }
 
 /** Only allowed while idle or complete; mid-block changes would be confusing. */
@@ -353,12 +363,14 @@ export function setCurrent(s: TimerState, id: number, now: number): TimerState {
   return { ...c, task: { ...c.task, currentId: id }, askDone: false };
 }
 
+/** Removing the last line mid-block keeps the clock going, so you can type a replacement; between blocks it clears. */
 export function removeLine(s: TimerState, id: number, now: number): TimerState {
   if (!s.task.lines.some((l) => l.id === id)) return s;
   const c = credit(s, now);
   const lines = c.task.lines.filter((l) => l.id !== id);
   const wasCurrent = c.task.currentId === id;
   const next = { ...c, task: { ...c.task, lines, currentId: wasCurrent ? null : c.task.currentId } };
+  if (hasNoLines(next) && !isActive(next)) return cleared(next);
   return withCurrent(wasCurrent ? { ...next, askDone: false } : next);
 }
 
@@ -378,9 +390,7 @@ export function taskFocusedMs(s: TimerState, now: number): number {
  */
 export function finishTask(s: TimerState, now: number): { state: TimerState; finished: Task | null } {
   const c = credit(s, now);
-  const finished = c.task.lines.length > 0 ? c.task : null;
-  const base = createTimer(s.presetId, (s.focusMs - s.extensions * EXTENSION_MS) / MINUTE, s.breakMs / MINUTE);
-  return { state: base, finished };
+  return { state: cleared(s), finished: hasNoLines(c) ? null : c.task };
 }
 
 // ---- The resume card ---------------------------------------------------------

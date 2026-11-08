@@ -62,10 +62,11 @@ function refresh() {
   if (state !== prev) saveTimer(state);
   const focusJustEnded =
     prev.phase === "focus" && state.phase !== "focus" && state.leftAt !== null && now - state.leftAt < ALERT_WINDOW_MS;
-  // tick() only ends a running break by running out, so this is the break finishing on its own.
+  // tick() only ends a running break by running out, so this is the break finishing on its own
+  // (to "complete", or to "idle" when no lines are left).
   const breakEndedAt = prev.phase === "break" && prev.startedAt !== null ? prev.startedAt + prev.breakMs - prev.elapsedMs : null;
   const breakJustEnded =
-    breakEndedAt !== null && state.phase === "complete" && now - breakEndedAt < ALERT_WINDOW_MS;
+    breakEndedAt !== null && state.phase !== "break" && now - breakEndedAt < ALERT_WINDOW_MS;
   const undoUntil = snapshot.undoUntil !== null && now < snapshot.undoUntil ? snapshot.undoUntil : null;
   if (undoUntil === null) beforeFinish = null;
   snapshot = { ...snapshot, state, now, undoUntil };

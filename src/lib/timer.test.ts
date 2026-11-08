@@ -260,6 +260,59 @@ describe("lines", () => {
     expect(s.task.currentId).toBe(two.id);
   });
 
+  describe("removing the only line", () => {
+    const named = () => setTitle(withLine("25-5"), "Old task");
+
+    it("mid-block keeps the clock running, and the next line picks it up", () => {
+      let s = start(named(), T0);
+      s = removeLine(s, s.task.lines[0].id, T0 + 5 * MIN);
+      expect(s.task.lines).toHaveLength(0);
+      expect(s.phase).toBe("focus");
+      expect(remaining(s, T0 + 5 * MIN)).toBe(20 * MIN);
+      s = addLine(s, "The right task", T0 + 8 * MIN);
+      s = pause(s, T0 + 10 * MIN);
+      expect(currentLine(s)!.focusedMs).toBe(5 * MIN); // from the removal on
+    });
+
+    it("then pausing and resuming still works", () => {
+      let s = start(named(), T0);
+      s = removeLine(s, s.task.lines[0].id, T0 + MIN);
+      s = toggle(s, T0 + 2 * MIN);
+      expect(s.startedAt).toBeNull();
+      s = toggle(s, T0 + 3 * MIN);
+      expect(s.startedAt).toBe(T0 + 3 * MIN);
+    });
+
+    it("then stopping returns to a clean idle, keeping the preset", () => {
+      let s = extend(start(named(), T0), T0 + MIN);
+      s = removeLine(s, s.task.lines[0].id, T0 + 2 * MIN);
+      s = stop(s, T0 + 3 * MIN);
+      expect(s).toEqual(createTimer("25-5"));
+    });
+
+    it("then running out still gives the break, followed by a clean idle", () => {
+      let s = start(named(), T0);
+      s = removeLine(s, s.task.lines[0].id, T0 + MIN);
+      s = tick(s, T0 + 26 * MIN);
+      expect(s.phase).toBe("break");
+      expect(s.askDone).toBe(false);
+      expect(tick(s, T0 + 31 * MIN)).toEqual(createTimer("25-5"));
+    });
+
+    it("between blocks clears straight away", () => {
+      const ended = stop(start(named(), T0), T0 + MIN);
+      expect(removeLine(ended, ended.task.lines[0].id, T0 + 2 * MIN)).toEqual(createTimer("25-5"));
+    });
+
+    it("leaves other lines alone when more than one exists", () => {
+      const s = stop(start(addLine(named(), "Two", T0 - MIN), T0), T0 + MIN);
+      const after = removeLine(s, s.task.lines[0].id, T0 + 2 * MIN);
+      expect(after.phase).toBe("complete");
+      expect(after.task.lines).toHaveLength(1);
+      expect(after.task.title).toBe("Old task");
+    });
+  });
+
   it("can't make a done line current", () => {
     let s = addLine(withLine(), "Two", T0);
     s = toggleDone(s, s.task.lines[0].id, T0);
