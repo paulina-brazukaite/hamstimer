@@ -38,6 +38,9 @@ export function createMaterials() {
     blush: new THREE.MeshBasicMaterial({ color: 0xf28e8e, transparent: true, opacity: 0.55, depthWrite: false }),
     seed: paint(0x4a3b31),
     seedStripe: paint(0xf3ead8),
+    choreRed: paint(0xd9574e),
+    choreBlue: paint(0x74b3d6),
+    choreIron: paint(0x4b4f57),
     bedding: paint(0xead39a),
     bookCover: paint(0x5d8c66),
     bookCover2: paint(0xe8bf55),
@@ -89,13 +92,13 @@ const SEG = 40;
 /** The main body ellipsoid, in the `inner` group's space (stage.ts keeps it on the floor). */
 export const BODY = { x: 0.62, y: 0.58, r: 0.62, sx: 1.22, sy: 0.92 };
 
-function blob(mat: THREE.Material, r: number, sx = 1, sy = 1, sz = 1) {
+export function blob(mat: THREE.Material, r: number, sx = 1, sy = 1, sz = 1) {
   const m = new THREE.Mesh(new THREE.SphereGeometry(r, SEG, SEG / 2), mat);
   m.scale.set(sx, sy, sz);
   return m;
 }
 
-function at<T extends THREE.Object3D>(o: T, x: number, y: number, z: number): T {
+export function at<T extends THREE.Object3D>(o: T, x: number, y: number, z: number): T {
   o.position.set(x, y, z);
   return o;
 }

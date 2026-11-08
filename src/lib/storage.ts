@@ -41,4 +41,8 @@ export const KEYS = {
   settings: "nextline:settings",
   /** Set once the first session starts; hides the first-visit intro on /. */
   onboarded: "nextline:onboarded",
+  /** Biggest haul in the Cheek Stuffer game. */
+  cheekBest: "nextline:cheekBest",
+  /** Highest laziness score in the Not Today game. */
+  notTodayBest: "nextline:notTodayBest",
 } as const;

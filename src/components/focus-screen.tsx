@@ -67,7 +67,12 @@ export function FocusScreen({ preset, intro }: { preset?: PresetId; intro?: Reac
         <div className="h-[3px] bg-lamp transition-[width] duration-300" style={{ width: `${pct}%` }} />
       </div>
 
-      <AppHeader links={[{ href: "/history", label: "History" }]} />
+      <AppHeader
+        links={[
+          { href: "/history", label: "History" },
+          { href: "/tired", label: "Tired?" },
+        ]}
+      />
 
       <main className="flex flex-1 flex-col">
         {intro}

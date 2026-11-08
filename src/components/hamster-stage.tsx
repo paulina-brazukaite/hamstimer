@@ -69,7 +69,7 @@ export function HamsterStage({ pose, className = "" }: { pose: HamsterPose; clas
   );
 }
 
-function hasWebGL(): boolean {
+export function hasWebGL(): boolean {
   try {
     const c = document.createElement("canvas");
     return !!(c.getContext("webgl2") || c.getContext("webgl"));

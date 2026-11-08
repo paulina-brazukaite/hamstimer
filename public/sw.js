@@ -11,7 +11,7 @@
 
 const VERSION = "v3";
 const CACHE = `busyhamster-${VERSION}`;
-const PAGES = ["/", "/history"];
+const PAGES = ["/", "/history", "/tired", "/tired/cheek-stuffer", "/tired/not-today", "/tired/tic-tac-toe"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(precache().then(() => self.skipWaiting()));

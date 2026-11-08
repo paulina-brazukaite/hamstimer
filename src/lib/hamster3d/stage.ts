@@ -320,7 +320,7 @@ export function createHamsterStage(canvas: HTMLCanvasElement, opts: { reducedMot
  * How far to lift the hamster so the lowest point of its body touches the floor
  * once it's tilted up by `pitch` (it pivots around its rear).
  */
-function groundOffset(pitch: number, squash: number) {
+export function groundOffset(pitch: number, squash: number) {
   const s = Math.sin(pitch);
   const c = Math.cos(pitch);
   const centreY = BODY.x * s + BODY.y * squash * c;
