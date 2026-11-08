@@ -24,9 +24,7 @@ export default async function BlogIndex() {
         <AppHeader links={[{ href: "/", label: "Timer" }]} />
         <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-14 sm:py-20">
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Blog</h1>
-          {posts.length === 0 ? (
-            <p className="mt-8 text-muted">No posts yet.</p>
-          ) : (
+          {posts.length > 0 && (
             <ol className="mt-10 border-t border-line-soft">
               {posts.map((p) => (
                 <li key={p.slug} className="border-b border-line-soft">

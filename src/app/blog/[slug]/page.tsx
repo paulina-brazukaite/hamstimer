@@ -4,15 +4,13 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AppHeader } from "@/components/app-header";
 import { SiteFooter } from "@/components/site-footer";
-import { blog } from "@/lib/blog";
+import { blog, postStaticParams } from "@/lib/blog";
 import { formatPostDate } from "@/lib/blog/format";
 
 // Same pattern as /timer/[preset]: every post is prerendered at build time.
 export const ensureStatic = "navigation";
 
-export async function generateStaticParams() {
-  return (await blog.listPosts()).map((p) => ({ slug: p.slug }));
-}
+export const generateStaticParams = postStaticParams;
 
 export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): Promise<Metadata> {
   const post = await blog.getPost((await params).slug);

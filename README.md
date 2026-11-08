@@ -88,7 +88,7 @@ src/
 ## Blog
 
 - Posts are Markdown files in `content/blog/<slug>.md` (the file name is the URL). Front matter:
-  `title`, `description`, `date` (and optionally `image`, `draft: true`). See the placeholder post.
+  `title`, `description`, `date` (and optionally `image`, `draft: true`).
 - Commit + push → Vercel rebuilds → the post is live, in the sitemap, with its own share image.
 - Pages only use the `BlogSource` interface (`src/lib/blog/types.ts`). To move posts to a CMS or
   database, write another source and change the one line in `src/lib/blog/index.ts`.
