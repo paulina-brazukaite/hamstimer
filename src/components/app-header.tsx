@@ -19,7 +19,7 @@ export function AppHeader({ links = [] }: { links?: { href: string; label: strin
           <rect x="1" y="15" width="11" height="4" rx="2" className="fill-lamp" />
           <circle cx="12" cy="9" r="4.5" className="fill-fg" />
         </svg>
-        <span className="text-base font-bold sm:text-lg tracking-[-0.02em]">Hamstimer</span>
+        <span className="text-base max-[350px]:text-sm font-bold sm:text-lg tracking-[-0.02em]">BusyHamster</span>
       </Link>
       <nav className="flex shrink-0 items-center gap-0.5 sm:gap-1">
         {links.map((l) => (

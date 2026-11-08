@@ -1,4 +1,4 @@
-# Hamstimer
+# BusyHamster
 
 A focus timer that remembers where your head was.
 

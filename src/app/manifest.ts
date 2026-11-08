@@ -4,8 +4,8 @@ import type { MetadataRoute } from "next";
 // This (plus HTTPS and the service worker) is what makes the app installable.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Hamstimer · focus timer",
-    short_name: "Hamstimer",
+    name: "BusyHamster · focus timer",
+    short_name: "BusyHamster",
     description: "A focus timer that remembers where your head was.",
     start_url: "/",
     scope: "/",

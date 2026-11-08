@@ -1,7 +1,7 @@
 import { OG_SIZE, renderOg } from "@/lib/og";
 import { TIMER_PAGES, findTimerPage } from "@/lib/timer-pages";
 
-export const alt = "Hamstimer focus timer";
+export const alt = "BusyHamster focus timer";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 

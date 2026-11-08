@@ -16,13 +16,13 @@ Secondary audience, confirmed by the SEO pages: people searching for a specific 
 
 ## Product Purpose
 
-Hamstimer is a focus timer that remembers where your head was. You type what you're working on and press Enter; that line is what the pomodoro is for. As you go you tick lines off and type the next one, so a task becomes a short list of steps, each with its own pomodoros. When you return, the line you were on is the first thing you see and one key resumes. Finishing a task moves it to History and clears the screen for the next one.
+BusyHamster is a focus timer that remembers where your head was. You type what you're working on and press Enter; that line is what the pomodoro is for. As you go you tick lines off and type the next one, so a task becomes a short list of steps, each with its own pomodoros. When you return, the line you were on is the first thing you see and one key resumes. Finishing a task moves it to History and clears the screen for the next one.
 
 Success means people come back to it and resume from the line they were on instead of starting cold.
 
 ## Positioning
 
-Most timers are good at telling you to stop; Hamstimer cares about the moment after, coming back to your work and knowing straight away where you were. The current line and one-key resume are the mechanism; the timer is the frame around them.
+Most timers are good at telling you to stop; BusyHamster cares about the moment after, coming back to your work and knowing straight away where you were. The current line and one-key resume are the mechanism; the timer is the frame around them.
 
 ## Operating Context
 
@@ -43,7 +43,7 @@ Most timers are good at telling you to stop; Hamstimer cares about the moment af
 
 ## Brand Commitments
 
-- Name: Hamstimer. Tagline: "A focus timer that remembers where your head was."
+- Name: BusyHamster. Tagline: "A focus timer that remembers where your head was."
 - Voice: plain, short, second person, practical British-leaning English ("look out of a window", "Future you will be grateful"); no hype.
 - Free side project: no pricing, upsells, accounts or paid tiers to design for.
 

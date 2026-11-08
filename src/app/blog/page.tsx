@@ -8,7 +8,7 @@ import { formatPostDate } from "@/lib/blog/format";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Notes on focus, breaks and picking work back up, from the people who make Hamstimer.",
+  description: "Notes on focus, breaks and picking work back up, from the people who make BusyHamster.",
   alternates: { canonical: "/blog" },
   openGraph: { url: "/blog" },
 };

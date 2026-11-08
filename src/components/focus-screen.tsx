@@ -228,7 +228,7 @@ function useDocumentTitle(state: TimerState | undefined, now: number, resuming: 
     if (resuming) title = `Resume · ${label}`;
     else if (state.phase === "focus") title = `${clock} · ${label}${isRunning(state) ? "" : " (paused)"}`;
     else if (state.phase === "break") title = `${clock} · Break`;
-    else if (state.phase === "complete") title = "Done · Hamstimer";
+    else if (state.phase === "complete") title = "Done · BusyHamster";
   }
   useEffect(() => {
     pageTitle.current ??= document.title;

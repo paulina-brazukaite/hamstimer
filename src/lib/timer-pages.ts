@@ -8,7 +8,7 @@ export interface TimerPage {
   presetId: PresetId;
   /** Shown big on the page. */
   heading: string;
-  /** <title> (the layout adds " · Hamstimer"). */
+  /** <title> (the layout adds " · BusyHamster"). */
   title: string;
   description: string;
   /** Short and unique per page: a couple of paragraphs, no filler. */

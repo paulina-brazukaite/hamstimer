@@ -114,7 +114,7 @@ export function createBackup(store: KeyValueStore, now: Date): Backup {
 }
 
 /**
- * Throws an Error with a human-readable message if the file isn't a Hamstimer backup.
+ * Throws an Error with a human-readable message if the file isn't a BusyHamster backup.
  * The backup format itself hasn't changed: the timer and history inside it are
  * converted when they're read, so backups from before tasks still import.
  */
@@ -127,9 +127,9 @@ export function parseBackup(text: string): Backup {
   }
   const b = raw as Partial<Backup> | null;
   if (!b || b.app !== "nextline" || typeof b.data !== "object" || b.data === null || Array.isArray(b.data)) {
-    throw new Error("That file isn't a Hamstimer backup.");
+    throw new Error("That file isn't a BusyHamster backup.");
   }
-  if (b.version !== 1) throw new Error("This backup is from a newer version of Hamstimer.");
+  if (b.version !== 1) throw new Error("This backup is from a newer version of BusyHamster.");
 
   // Only ever touch our own keys, whatever else is in the file.
   const data: Record<string, unknown> = {};

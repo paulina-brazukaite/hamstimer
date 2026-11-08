@@ -9,7 +9,7 @@ export function exportBackup(): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `hamstimer-backup-${backup.exportedAt.slice(0, 10)}.json`;
+  a.download = `busyhamster-backup-${backup.exportedAt.slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -22,7 +22,7 @@ export async function importBackupFile(file: File): Promise<string | null> {
   try {
     const backup = parseBackup(await file.text());
     const when = backup.exportedAt ? ` from ${new Date(backup.exportedAt).toLocaleString()}` : "";
-    if (!window.confirm(`Replace all your Hamstimer data with this backup${when}? This can't be undone.`)) {
+    if (!window.confirm(`Replace all your BusyHamster data with this backup${when}? This can't be undone.`)) {
       return null;
     }
     // Clear our keys first so nothing from before the backup lingers.

@@ -6,9 +6,9 @@ Status: built · 2026-11-07 (P0, plus clicking a line to make it current and rem
 
 ## Problem
 
-Today a Hamstimer session holds one intention and one "next step" note. Real work on a big task moves through many small steps, so the single note is overwritten again and again and the record of what you actually did is lost. Around those two strings sits a lot of timer machinery (presets, a preset picker, the note board, a separate intention input) that makes the app feel heavier than the job it does.
+Today a BusyHamster session holds one intention and one "next step" note. Real work on a big task moves through many small steps, so the single note is overwritten again and again and the record of what you actually did is lost. Around those two strings sits a lot of timer machinery (presets, a preset picker, the note board, a separate intention input) that makes the app feel heavier than the job it does.
 
-If we do nothing, Hamstimer stays a timer with a sticky note: fine for one session, weak for a task that takes a day.
+If we do nothing, BusyHamster stays a timer with a sticky note: fine for one session, weak for a task that takes a day.
 
 ## Goals
 
@@ -140,7 +140,7 @@ Timer (one, global, as today)
 
 ## Success metrics
 
-Hamstimer has no analytics and shouldn't get any (Principle 3), so these are checked by using it and by reading your own History export.
+BusyHamster has no analytics and shouldn't get any (Principle 3), so these are checked by using it and by reading your own History export.
 
 - **Leading (first week):** you add 3 or more lines per task on most days; the end-of-focus prompt gets answered rather than ignored.
 - **Leading:** adding a line takes one keystroke after typing (Enter), checked by hand.
