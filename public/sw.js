@@ -9,7 +9,7 @@
 //
 // Bump VERSION to throw away old caches.
 
-const VERSION = "v2";
+const VERSION = "v3";
 const CACHE = `busyhamster-${VERSION}`;
 const PAGES = ["/", "/history"];
 
@@ -30,7 +30,7 @@ self.addEventListener("activate", (event) => {
 /** Cache the pages, plus every script/style/font they reference, so the very first visit is enough. */
 async function precache() {
   const cache = await caches.open(CACHE);
-  const assets = new Set(["/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"]);
+  const assets = new Set(["/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png", "/icons/icon-maskable-512.png"]);
   for (const page of PAGES) {
     try {
       const res = await fetch(page, { cache: "no-store" });

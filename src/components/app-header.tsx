@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PeekMark } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { openCommandMenu } from "@/components/command-menu";
 import { useModKey } from "@/lib/use-stored";
@@ -14,11 +15,7 @@ export function AppHeader({ links = [] }: { links?: { href: string; label: strin
   return (
     <header className="flex items-center justify-between gap-2 px-6 pt-6 max-[350px]:px-3 sm:gap-4 sm:px-10">
       <Link href="/" className="flex shrink-0 items-center gap-2 rounded-lg sm:gap-2.5">
-        <svg viewBox="0 0 22 22" className="size-[22px] shrink-0" aria-hidden="true">
-          <rect x="1" y="15" width="20" height="4" rx="2" className="fill-fg" />
-          <rect x="1" y="15" width="11" height="4" rx="2" className="fill-lamp" />
-          <circle cx="12" cy="9" r="4.5" className="fill-fg" />
-        </svg>
+        <PeekMark className="h-[18px] w-7 shrink-0 max-[350px]:h-[14px] max-[350px]:w-[22px] sm:h-[22px] sm:w-[34px]" />
         <span className="text-base max-[350px]:text-sm font-bold sm:text-lg tracking-[-0.02em]">BusyHamster</span>
       </Link>
       <nav className="flex shrink-0 items-center gap-0.5 sm:gap-1">

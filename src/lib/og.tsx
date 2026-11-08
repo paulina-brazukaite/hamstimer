@@ -35,19 +35,28 @@ export async function renderOg({ title, clock, eyebrow }: { title: string; clock
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "#0f1012",
-          color: "#ece9e3",
+          background: "#121417",
+          color: "#eceef0",
           fontFamily: "Geist",
           padding: "64px 80px",
         }}
       >
         {/* progress line */}
-        <div style={{ display: "flex", position: "absolute", top: 0, left: 0, width: 1200, height: 6, background: "#23262b" }}>
-          <div style={{ width: 640, height: 6, background: "#e9a84c" }} />
+        <div style={{ display: "flex", position: "absolute", top: 0, left: 0, width: 1200, height: 6, background: "#23272c" }}>
+          <div style={{ width: 640, height: 6, background: "#f2c230" }} />
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div style={{ width: 18, height: 18, borderRadius: 9, background: "#e9a84c" }} />
+          <svg width="62" height="40" viewBox="4 20 56 36">
+            <circle cx="18" cy="28" r="7" fill="#eceef0" />
+            <circle cx="46" cy="28" r="7" fill="#eceef0" />
+            <path
+              fill="#eceef0"
+              fillRule="evenodd"
+              d="M13 45a19 19 0 0 1 38 0zM22.5 36a3 3 0 1 0 6 0a3 3 0 1 0-6 0zM35.5 36a3 3 0 1 0 6 0a3 3 0 1 0-6 0zM29.4 41.2a2.6 2 0 1 0 5.2 0a2.6 2 0 1 0-5.2 0z"
+            />
+            <rect x="5" y="48" width="54" height="7" rx="3.5" fill="#f2c230" />
+          </svg>
           <div style={{ fontSize: 34, fontWeight: 600 }}>BusyHamster</div>
         </div>
 
@@ -57,7 +66,7 @@ export async function renderOg({ title, clock, eyebrow }: { title: string; clock
               {clock}
             </div>
           ) : (
-            <div style={{ display: "flex", fontFamily: "Geist Mono", fontSize: 28, color: "#9a9ea6" }}>{eyebrow}</div>
+            <div style={{ display: "flex", fontFamily: "Geist Mono", fontSize: 28, color: "#a3a9b1" }}>{eyebrow}</div>
           )}
           <div
             style={{
@@ -66,7 +75,7 @@ export async function renderOg({ title, clock, eyebrow }: { title: string; clock
               fontSize: clock ? 46 : 64,
               fontWeight: 600,
               lineHeight: 1.15,
-              color: "#ece9e3",
+              color: "#eceef0",
               maxWidth: 1040,
             }}
           >
@@ -74,8 +83,8 @@ export async function renderOg({ title, clock, eyebrow }: { title: string; clock
           </div>
         </div>
 
-        <div style={{ display: "flex", fontFamily: "Geist Mono", fontSize: 24, color: "#9a9ea6" }}>
-          <span style={{ color: "#e9a84c", marginRight: 14 }}>↳ next</span>
+        <div style={{ display: "flex", fontFamily: "Geist Mono", fontSize: 24, color: "#a3a9b1" }}>
+          <span style={{ color: "#f2c230", marginRight: 14 }}>↳ next</span>
           <span>pick up exactly where you left off</span>
         </div>
       </div>
