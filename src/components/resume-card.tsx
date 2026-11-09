@@ -5,6 +5,7 @@ import { finishTaskUndoable, update } from "@/lib/timer-store";
 import { currentLine, formatAgo, resumeSession, type TimerState } from "@/lib/timer";
 import { leadClass } from "@/components/lead";
 import { Pomodoros } from "@/components/task-view";
+import { Button, Card, ProgressBar } from "@/components/ui";
 
 const MIN = 60_000;
 
@@ -40,10 +41,13 @@ export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
   if (!line) return null;
 
   return (
-    <section
+    <Card
+      as="section"
+      radius="xl"
+      raised
       role="dialog"
       aria-labelledby="resume-lead"
-      className="animate-rise-in w-full max-w-lg rounded-[20px] border border-line bg-surface p-7 shadow-card sm:p-9"
+      className="animate-rise-in w-full max-w-lg p-7 sm:p-9"
     >
       <p className="text-xs text-faint">
         Where you left off{ago && <> · {ago}</>}
@@ -70,9 +74,7 @@ export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
 
       {pausedMidBlock && (
         <div className="mt-5">
-          <div className="h-0.5 w-full rounded-full bg-line-soft" aria-hidden="true">
-            <div className="h-0.5 rounded-full bg-lamp" style={{ width: `${share * 100}%` }} />
-          </div>
+          <ProgressBar value={share} />
           <p className="mt-2.5 text-xs text-faint tabular-nums">
             Paused at {Math.round(state.elapsedMs / MIN)} of {Math.round(state.focusMs / MIN)} min
           </p>
@@ -80,24 +82,13 @@ export function ResumeCard({ state, now }: { state: TimerState; now: number }) {
       )}
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          autoFocus
-          onClick={() => update(resumeSession)}
-          className="inline-flex min-h-11 items-center gap-3 rounded-full bg-lamp px-6 text-[15px] font-semibold text-lamp-fg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg"
-        >
+        <Button variant="primary" size="lg" shortcut="R" autoFocus onClick={() => update(resumeSession)}>
           Resume
-          <kbd className="text-xs opacity-70 pointer-coarse:hidden">R</kbd>
-        </button>
-        <button
-          type="button"
-          onClick={finishTaskUndoable}
-          className="inline-flex min-h-11 items-center gap-3 rounded-full border border-line px-5 text-[15px] text-muted transition-colors hover:text-fg"
-        >
+        </Button>
+        <Button variant="outline" size="lg" shortcut="Esc" onClick={finishTaskUndoable}>
           Finish task
-          <kbd className="text-xs text-faint pointer-coarse:hidden">Esc</kbd>
-        </button>
+        </Button>
       </div>
-    </section>
+    </Card>
   );
 }

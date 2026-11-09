@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { AppHeader } from "@/components/app-header";
+import { Button, ButtonLink, PageHeading, ProgressBar, Stat } from "@/components/ui";
 import { useGameStage } from "@/components/use-game-stage";
 import type { Hud } from "@/lib/hamster3d/not-today-game";
 import { HIT_LINES, PERIODS, laziness, verdict, type GameEvent, type Run } from "@/lib/not-today";
@@ -12,10 +12,6 @@ const loadStage = () => import("@/lib/hamster3d/not-today-game").then((m) => m.c
 
 const EMPTY_HUD: Hud = { period: 0, progress: 0, dodged: 0, stuck: 0, seeds: 0 };
 const FIRST_LINE = "Today, the hamster will do nothing.";
-
-const pill = "inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-medium whitespace-nowrap transition-colors";
-const primary = `${pill} bg-lamp text-lamp-fg`;
-const secondary = `${pill} border border-line bg-surface text-fg hover:border-faint`;
 
 interface Result {
   title: string;
@@ -121,8 +117,7 @@ export function NotToday() {
       <AppHeader links={[{ href: "/tired", label: "Games" }]} />
 
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-8 max-[350px]:px-3 sm:py-12">
-        <h1 className="text-2xl font-semibold tracking-tight">Not Today</h1>
-        <p className="mt-1 text-sm text-muted">Get through the whole day without doing a single thing.</p>
+        <PageHeading description="Get through the whole day without doing a single thing.">Not Today</PageHeading>
 
         {failed ? (
           <p className="mt-6 rounded-3xl bg-well p-8 text-center text-sm text-muted">
@@ -145,15 +140,13 @@ export function NotToday() {
                 </p>
               )}
               {!playing && !result && ready && (
-                <button type="button" onClick={start} className={`${primary} absolute bottom-5 left-1/2 -translate-x-1/2`}>
+                <Button variant="primary" size="xl" onClick={start} className="absolute bottom-5 left-1/2 -translate-x-1/2">
                   Start the day
-                </button>
+                </Button>
               )}
             </div>
 
-            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-line-soft" aria-hidden="true">
-              <div className="h-full rounded-full bg-lamp" style={{ width: `${hud.progress * 100}%` }} />
-            </div>
+            <ProgressBar size="md" value={hud.progress} className="mt-4" />
             <dl className="mt-3 flex flex-wrap justify-between gap-x-4 gap-y-1 text-sm text-muted">
               <Stat label="Time" value={PERIODS[hud.period]} />
               <Stat label="Dodged" value={hud.dodged} />
@@ -169,12 +162,12 @@ export function NotToday() {
                   Laziness score {result.score}. {result.isNew ? "A new personal best!" : `Your best is ${result.best}.`}
                 </p>
                 <div className="mt-5 flex flex-wrap justify-center gap-3">
-                  <button type="button" onClick={start} className={primary}>
+                  <Button variant="primary" size="xl" onClick={start}>
                     Another day
-                  </button>
-                  <Link href="/" className={secondary}>
+                  </Button>
+                  <ButtonLink href="/" variant="secondary" size="xl">
                     Back to work
-                  </Link>
+                  </ButtonLink>
                 </div>
               </section>
             ) : (
@@ -187,15 +180,6 @@ export function NotToday() {
           </>
         )}
       </main>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="flex items-baseline gap-1.5">
-      <dt>{label}</dt>
-      <dd className="font-medium tabular-nums text-fg">{value}</dd>
     </div>
   );
 }

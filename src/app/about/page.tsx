@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { AppHeader } from "@/components/app-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ButtonLink, PageHeading, TextLink } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "About",
@@ -16,7 +16,7 @@ export default function AboutPage() {
       <div className="flex min-h-svh flex-col">
         <AppHeader links={[{ href: "/", label: "Timer" }]} />
         <main className="mx-auto w-full max-w-xl flex-1 px-6 py-14 sm:py-20">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">About BusyHamster</h1>
+          <PageHeading size="lg">About BusyHamster</PageHeading>
 
           <div className="mt-6 space-y-4 text-[17px] leading-relaxed text-pretty text-muted">
             <p>
@@ -34,19 +34,14 @@ export default function AboutPage() {
           <p className="mt-3 text-[17px] leading-relaxed text-muted">
             There&apos;s no account. Your tasks and their steps are stored in your own browser and never sent to us.
             You can download everything as a file from{" "}
-            <Link href="/history" className="text-fg underline decoration-line underline-offset-4 hover:decoration-fg">
-              History
-            </Link>{" "}
+            <TextLink href="/history">History</TextLink>{" "}
             at any time. It also works offline, and you can install it as an app.
           </p>
 
           <p className="mt-12">
-            <Link
-              href="/"
-              className="inline-flex min-h-11 items-center rounded-lg border border-line bg-surface px-5 text-[15px] text-fg transition-colors hover:border-faint"
-            >
+            <ButtonLink href="/" variant="secondary" size="lg">
               Open the timer
-            </Link>
+            </ButtonLink>
           </p>
         </main>
       </div>

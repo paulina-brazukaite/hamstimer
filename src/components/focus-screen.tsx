@@ -14,6 +14,7 @@ import { UndoToast } from "@/components/undo-toast";
 import { useTimer } from "@/lib/use-timer";
 import { useModKey } from "@/lib/use-stored";
 import { NotifyPrompt } from "@/components/notify-prompt";
+import { Button, ProgressBar } from "@/components/ui";
 import {
   EXTENSION_MS,
   canStart,
@@ -63,9 +64,7 @@ export function FocusScreen({ preset, intro }: { preset?: PresetId; intro?: Reac
   return (
     <>
     <div className="flex min-h-svh flex-col">
-      <div className="h-[3px] w-full bg-line-soft" aria-hidden="true">
-        <div className="h-[3px] bg-lamp transition-[width] duration-300" style={{ width: `${pct}%` }} />
-      </div>
+      <ProgressBar size="sm" value={pct / 100} />
 
       <AppHeader
         links={[
@@ -152,31 +151,19 @@ function TimerView({ state, now }: { state: TimerState; now: number }) {
           {(hasLines || active) && (
             <div className="flex flex-wrap justify-center gap-2 pt-2">
               {(active || startable) && (
-                <button
-                  type="button"
-                  onClick={() => update(toggle)}
-                  className="min-h-11 rounded-full bg-fg px-6 text-[15px] font-semibold text-ground transition-opacity hover:opacity-85"
-                >
+                <Button variant="solid" size="lg" onClick={() => update(toggle)}>
                   {running ? "Pause" : active ? "Resume" : "Start"}
-                </button>
+                </Button>
               )}
               {active && (
-                <button
-                  type="button"
-                  onClick={() => update(stop)}
-                  className="min-h-11 rounded-full border border-line bg-surface px-5 text-[15px] transition-colors hover:border-faint"
-                >
+                <Button variant="secondary" size="lg" onClick={() => update(stop)}>
                   Stop
-                </button>
+                </Button>
               )}
               {hasLines && (
-                <button
-                  type="button"
-                  onClick={finishTaskUndoable}
-                  className="min-h-11 rounded-full px-4 text-[15px] text-muted transition-colors hover:text-fg"
-                >
+                <Button variant="ghost" size="lg" onClick={finishTaskUndoable}>
                   Finish task
-                </button>
+                </Button>
               )}
             </div>
           )}

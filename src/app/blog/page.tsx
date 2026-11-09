@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AppHeader } from "@/components/app-header";
 import { SiteFooter } from "@/components/site-footer";
 import { SoroBlog } from "@/components/soro-blog";
+import { PageHeading } from "@/components/ui";
 import { blog } from "@/lib/blog";
 import { formatPostDate } from "@/lib/blog/format";
 
@@ -23,7 +24,7 @@ export default async function BlogIndex() {
       <div className="flex min-h-svh flex-col">
         <AppHeader links={[{ href: "/", label: "Timer" }]} />
         <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-14 sm:py-20">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Blog</h1>
+          <PageHeading size="lg">Blog</PageHeading>
           {posts.length > 0 && (
             <ol className="mt-10 border-t border-line-soft">
               {posts.map((p) => (

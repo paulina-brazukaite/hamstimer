@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { setNotifications, updateSettings } from "@/lib/settings";
 import { useSettings } from "@/lib/use-stored";
+import { Button, Card } from "@/components/ui";
 
 /**
  * Asks about notifications once, in context: during a focus block, when a
@@ -33,9 +34,11 @@ export function NotifyPrompt() {
   if (!supported || settings.notify || settings.notifyAsked || Notification.permission === "denied") return null;
 
   return (
-    <section
+    <Card
+      as="section"
+      radius="lg"
       aria-label="Notifications"
-      className="animate-rise-in flex w-full max-w-xl flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-line bg-surface px-4 py-3"
+      className="animate-rise-in flex w-full max-w-xl flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3"
     >
       <svg
         viewBox="0 0 24 24"
@@ -54,25 +57,20 @@ export function NotifyPrompt() {
         Want a nudge when this block or your break ends, even if you&apos;re in another tab?
       </p>
       <div className="flex gap-2">
-        <button
-          type="button"
+        <Button
+          variant="solid"
           onClick={() =>
             void setNotifications(true).then((problem) =>
               setMessage(problem ?? "Done. You'll get a nudge when a block or break ends."),
             )
           }
-          className="min-h-10 rounded-full bg-fg px-4 text-sm font-semibold text-ground transition-opacity hover:opacity-85"
         >
           Turn on
-        </button>
-        <button
-          type="button"
-          onClick={() => updateSettings({ notifyAsked: true })}
-          className="min-h-10 rounded-full px-3 text-sm text-muted transition-colors hover:text-fg"
-        >
+        </Button>
+        <Button variant="ghost" onClick={() => updateSettings({ notifyAsked: true })}>
           No thanks
-        </button>
+        </Button>
       </div>
-    </section>
+    </Card>
   );
 }

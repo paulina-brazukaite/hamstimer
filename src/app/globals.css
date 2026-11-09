@@ -5,11 +5,14 @@
   Dark is the default; [data-theme="light"] on <html> switches to light.
   Components use semantic Tailwind classes like bg-ground, text-muted, bg-lamp,
   so the theme swap is just these variables changing.
+  The same blocks also apply to any element with data-theme, so a page can show
+  both themes at once (the /design-system page does).
   - lamp: the sunflower-yellow fill (progress, dots, the Resume and Done buttons).
   - lamp-ink: the same accent as text; yellow text fails contrast on light, so it's ink there.
   - prop / prop-soft: the hamster scene's objects (wheel, laptop, nest).
 */
-:root {
+:root,
+[data-theme="dark"] {
   --ground: #121417;
   --surface: #1c1f23;
   --well: #121417;
@@ -27,7 +30,8 @@
   color-scheme: dark;
 }
 
-:root[data-theme="light"] {
+:root[data-theme="light"],
+[data-theme="light"] {
   --ground: #f6f7f8;
   --surface: #ffffff;
   --well: #f6f7f8;

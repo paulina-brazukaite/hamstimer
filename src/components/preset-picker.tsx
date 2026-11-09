@@ -2,10 +2,7 @@
 
 import { update } from "@/lib/timer-store";
 import { PRESETS, choosePreset, type TimerState } from "@/lib/timer";
-
-const chip = "min-h-10 rounded-full border px-4 text-sm tabular-nums transition-colors";
-const on = "border-fg font-semibold text-fg";
-const off = "border-line text-muted hover:text-fg";
+import { Chip, TextInput } from "@/components/ui";
 
 /**
  * Focus / break length, under the clock while nothing is running. Changing it
@@ -24,26 +21,19 @@ export function PresetPicker({ state }: { state: TimerState }) {
     <div className="flex flex-col items-center gap-3">
       <div className="flex flex-wrap justify-center gap-2" role="radiogroup" aria-label="Focus and break length">
         {PRESETS.map((p) => (
-          <button
+          <Chip
             key={p.id}
-            type="button"
             role="radio"
             aria-checked={state.presetId === p.id}
+            selected={state.presetId === p.id}
             onClick={() => update((s) => choosePreset(s, p.id))}
-            className={`${chip} ${state.presetId === p.id ? on : off}`}
           >
             {p.label}
-          </button>
+          </Chip>
         ))}
-        <button
-          type="button"
-          role="radio"
-          aria-checked={isCustom}
-          onClick={() => setCustom(focusMin, breakMin)}
-          className={`${chip} ${isCustom ? on : off}`}
-        >
+        <Chip role="radio" aria-checked={isCustom} selected={isCustom} onClick={() => setCustom(focusMin, breakMin)}>
           Custom
-        </button>
+        </Chip>
       </div>
 
       {isCustom && (
@@ -62,7 +52,8 @@ function MinutesInput(props: { label: string; value: number; max: number; onComm
   return (
     <label className="flex items-center gap-2">
       {props.label}
-      <input
+      <TextInput
+        size="sm"
         type="number"
         min={1}
         max={props.max}
@@ -75,7 +66,7 @@ function MinutesInput(props: { label: string; value: number; max: number; onComm
         onKeyDown={(e) => {
           if (e.key === "Enter") e.currentTarget.blur();
         }}
-        className="w-16 rounded-xl border border-line bg-well px-2 py-1.5 text-fg"
+        className="w-16"
       />
       min
     </label>

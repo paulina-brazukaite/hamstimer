@@ -32,10 +32,12 @@ src/
     timer/[preset]/ one template for /timer/50-10, /timer/25-5, /timer/90-minute
     about/          "/about"
     blog/           "/blog" and "/blog/[slug]" (static, one page per post)
+    design-system/  "/design-system": every token and primitive, both themes (404 in production)
     sitemap.ts, robots.ts, opengraph-image.tsx   SEO (all static at build time)
     icon.svg, apple-icon.png   favicons (Next file conventions)
   components/       UI pieces ("use client" where they need the browser)
                     focus-screen.tsx is "/": resume card or timer view
+    ui/             design system primitives: Button, Card, Chip, TextInput, ProgressBar… (see DESIGN.md)
   lib/
     storage.ts      safe localStorage wrapper (never throws)
     timer.ts        timer engine: pure functions over timestamps (+ timer.test.ts)
@@ -55,6 +57,7 @@ src/
 
 ## Conventions
 
+- **UI:** build from `src/components/ui` and the tokens; see [DESIGN.md](DESIGN.md) for when to use what.
 - **Colours:** use the semantic classes only (`bg-ground`, `bg-surface`, `border-line`, `text-fg`,
   `text-muted`, `text-faint`, `bg-lamp`, `text-lamp-fg`). Never hard-code a hex in a component;
   both themes come from the variables in `globals.css`.

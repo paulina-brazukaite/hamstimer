@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { AppHeader } from "@/components/app-header";
+import { Button, ButtonLink, PageHeading, Stat } from "@/components/ui";
 import { useGameStage } from "@/components/use-game-stage";
 import { EMPTY_BOARD, chooseMove, outcome, place, type Board, type Outcome } from "@/lib/tic-tac-toe";
 import type { PanicBeat, TicTacToeApi } from "@/lib/hamster3d/tic-tac-toe-game";
@@ -21,10 +21,6 @@ const PANIC_LINES: Record<PanicBeat, string> = {
   stare: "…",
   gone: "You won. The hamster has left the building.",
 };
-
-const pill = "inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-medium whitespace-nowrap transition-colors";
-const primary = `${pill} bg-lamp text-lamp-fg`;
-const secondary = `${pill} border border-line bg-surface text-fg hover:border-faint`;
 
 type Phase = "you" | "busy" | "over";
 interface Match {
@@ -136,8 +132,7 @@ export function TicTacToe() {
       <AppHeader links={[{ href: "/tired", label: "Games" }]} />
 
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-8 max-[350px]:px-3 sm:py-12">
-        <h1 className="text-2xl font-semibold tracking-tight">Tic Tac Toe</h1>
-        <p className="mt-1 text-sm text-muted">You against the hamster. It has a very big pen.</p>
+        <PageHeading description="You against the hamster. It has a very big pen.">Tic Tac Toe</PageHeading>
 
         <div className="relative mt-6">
           {!failed && (
@@ -189,24 +184,15 @@ export function TicTacToe() {
 
         {over && (
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <button type="button" onClick={playAgain} className={primary}>
+            <Button variant="primary" size="xl" onClick={playAgain}>
               Play again
-            </button>
-            <Link href="/" className={secondary}>
+            </Button>
+            <ButtonLink href="/" variant="secondary" size="xl">
               Back to work
-            </Link>
+            </ButtonLink>
           </div>
         )}
       </main>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="flex items-baseline gap-1.5">
-      <dt>{label}</dt>
-      <dd className="font-medium tabular-nums text-fg">{value}</dd>
     </div>
   );
 }

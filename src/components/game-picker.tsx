@@ -1,6 +1,7 @@
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import { AppHeader } from "@/components/app-header";
+import { PageHeading, cardClass } from "@/components/ui";
 import cheekStufferShot from "@/app/tired/cheek-stuffer.webp";
 import notTodayShot from "@/app/tired/not-today.webp";
 import ticTacToeShot from "@/app/tired/tic-tac-toe.webp";
@@ -32,13 +33,12 @@ export function GamePicker() {
       <AppHeader links={[{ href: "/", label: "Timer" }]} />
 
       <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-8 max-[350px]:px-3 sm:py-12">
-        <h1 className="text-2xl font-semibold tracking-tight">Tired?</h1>
-        <p className="mt-1 text-sm text-muted">Pick a game.</p>
+        <PageHeading description="Pick a game.">Tired?</PageHeading>
 
         <ul className="mt-6 grid gap-4 sm:grid-cols-3">
           {GAMES.map((game) => (
             <li key={game.href}>
-              <Link href={game.href} className="group block overflow-hidden rounded-3xl border border-line bg-surface transition-colors hover:border-faint">
+              <Link href={game.href} className={cardClass({ radius: "2xl", interactive: true }, "group block overflow-hidden")}>
                 <Image
                   src={game.shot}
                   alt={game.alt}

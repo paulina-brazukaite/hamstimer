@@ -10,6 +10,7 @@ import { setNotifications, updateSettings } from "@/lib/settings";
 import { toggleTheme } from "@/lib/theme";
 import { playChime } from "@/lib/sound";
 import { exportBackup, pickBackupFile } from "@/lib/backup-actions";
+import { Card, Kbd } from "@/components/ui";
 import {
   PRESETS,
   canStart,
@@ -93,11 +94,12 @@ function MenuPanel({ onClose }: { onClose: () => void }) {
       className="fixed inset-0 z-50 flex items-start justify-center bg-ground/70 px-4 pt-[14vh]"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div
+      <Card
+        raised
         role="dialog"
         aria-modal="true"
         aria-label="Command menu"
-        className="w-full max-w-lg overflow-hidden rounded-xl border border-line bg-surface shadow-card"
+        className="w-full max-w-lg overflow-hidden"
       >
         <input
           autoFocus
@@ -146,7 +148,7 @@ function MenuPanel({ onClose }: { onClose: () => void }) {
                 className="mx-2 flex min-h-10 cursor-pointer items-center justify-between gap-4 rounded-lg px-3 text-sm text-muted aria-selected:bg-well aria-selected:text-fg"
               >
                 <span>{c.label}</span>
-                {c.keys && <kbd className="text-xs text-faint">{c.keys}</kbd>}
+                {c.keys && <Kbd>{c.keys}</Kbd>}
               </div>
             </li>
           ))}
@@ -158,7 +160,7 @@ function MenuPanel({ onClose }: { onClose: () => void }) {
           <span>Enter run</span>
           <span>Esc close</span>
         </p>
-      </div>
+      </Card>
     </div>
   );
 }

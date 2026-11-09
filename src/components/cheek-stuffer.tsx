@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { AppHeader } from "@/components/app-header";
+import { Button, ButtonLink, PageHeading, Stat } from "@/components/ui";
 import { HamsterScene } from "@/components/hamster-scene";
 import { useGameStage } from "@/components/use-game-stage";
 import { TRIPS, bank, fullness, mumble, newGame, nextTrip, reviewTitle, stuff, type Game } from "@/lib/cheek-stuffer";
@@ -13,10 +13,6 @@ const loadStage = () => import("@/lib/hamster3d/cheek-game").then((m) => m.creat
 
 /** How long the message stays up when there is no 3D animation to wait for. */
 const NO_3D_PAUSE = 900;
-
-const pill = "inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-medium whitespace-nowrap transition-colors max-[350px]:px-3";
-const primary = `${pill} bg-lamp text-lamp-fg aria-disabled:opacity-50`;
-const secondary = `${pill} border border-line bg-surface text-fg hover:border-faint aria-disabled:opacity-50`;
 
 export function CheekStuffer() {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -110,8 +106,7 @@ export function CheekStuffer() {
       <AppHeader links={[{ href: "/tired", label: "Games" }]} />
 
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-8 max-[350px]:px-3 sm:py-12">
-        <h1 className="text-2xl font-semibold tracking-tight">Cheek Stuffer</h1>
-        <p className="mt-1 text-sm text-muted">Stuff the hamster&apos;s cheeks, then waddle the seeds to the nest before they burst.</p>
+        <PageHeading description={<>Stuff the hamster&apos;s cheeks, then waddle the seeds to the nest before they burst.</>}>Cheek Stuffer</PageHeading>
 
         <div className="relative mt-6">
           {/* The buttons below are the accessible way to play; this is the big tap target. */}
@@ -147,37 +142,28 @@ export function CheekStuffer() {
               {best?.isNew ? "A new personal best!" : `Your best is ${best?.score ?? 0}.`}
             </p>
             <div className="mt-5 flex flex-wrap justify-center gap-3">
-              <button type="button" onClick={playAgain} className={primary}>
+              <Button variant="primary" size="xl" onClick={playAgain}>
                 Stuff again
-              </button>
-              <Link href="/" className={secondary}>
+              </Button>
+              <ButtonLink href="/" variant="secondary" size="xl">
                 Back to work
-              </Link>
+              </ButtonLink>
             </div>
           </section>
         ) : (
           <>
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <button type="button" onClick={onStuff} aria-disabled={busy} className={primary}>
+              <Button variant="primary" size="xl" onClick={onStuff} aria-disabled={busy}>
                 Stuff a seed
-              </button>
-              <button type="button" onClick={onBank} aria-disabled={busy || game.cheeks === 0} className={secondary}>
+              </Button>
+              <Button variant="secondary" size="xl" onClick={onBank} aria-disabled={busy || game.cheeks === 0}>
                 Waddle to nest
-              </button>
+              </Button>
             </div>
             <p className="mt-3 text-center text-xs text-faint pointer-coarse:hidden">Space to stuff, B to waddle</p>
           </>
         )}
       </main>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="flex items-baseline gap-1.5">
-      <dt>{label}</dt>
-      <dd className="font-medium tabular-nums text-fg">{value}</dd>
     </div>
   );
 }

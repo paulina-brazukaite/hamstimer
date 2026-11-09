@@ -7,9 +7,7 @@ import { useStoredRaw } from "@/lib/use-stored";
 import { formatDuration, parseHistory, pomodoroCount, type HistoryEntry } from "@/lib/history";
 import { Pomodoros } from "@/components/task-view";
 import { exportBackup, importBackupFile } from "@/lib/backup-actions";
-
-const button =
-  "inline-flex min-h-10 items-center rounded-full border border-line bg-surface px-4 text-sm text-fg transition-colors hover:border-faint";
+import { Button, PageHeading } from "@/components/ui";
 
 export function HistoryScreen() {
   const raw = useStoredRaw(KEYS.history);
@@ -29,14 +27,10 @@ export function HistoryScreen() {
 
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-12 sm:py-16">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="text-2xl font-semibold tracking-tight">History</h1>
+          <PageHeading>History</PageHeading>
           <div className="flex gap-2">
-            <button type="button" onClick={exportData} className={button}>
-              Export
-            </button>
-            <button type="button" onClick={() => fileInput.current?.click()} className={button}>
-              Import
-            </button>
+            <Button onClick={exportData}>Export</Button>
+            <Button onClick={() => fileInput.current?.click()}>Import</Button>
             <input
               ref={fileInput}
               type="file"

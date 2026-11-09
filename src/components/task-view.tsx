@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { update } from "@/lib/timer-store";
 import { LEAD_SIZE } from "@/components/lead";
+import { Button, Card, TextInput, cn } from "@/components/ui";
 import {
   MAX_LINE,
   MAX_TITLE,
@@ -219,54 +220,55 @@ function LineInput({ big, hasLines }: { big: boolean; hasLines: boolean }) {
     ref.current?.focus(); // ready for the next line
   }
 
+  const inputProps = {
+    ref,
+    id: LINE_INPUT_ID,
+    type: "text",
+    maxLength: MAX_LINE,
+    value: text,
+    onChange: (e: ChangeEvent<HTMLInputElement>) => setText(e.target.value),
+    placeholder: hasLines ? "What's next?" : "What are you working on?",
+    "aria-label": "Add a line: what you're working on",
+    autoComplete: "off",
+    enterKeyHint: "done",
+    onKeyDown: (e: ReactKeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        add();
+      } else if (e.key === " " && text === "") {
+        e.preventDefault();
+        update(toggle);
+      } else if (e.key === "Escape") {
+        e.currentTarget.blur();
+      }
+    },
+  } as const;
+
   return (
-    <div className={`relative ${big ? "w-full" : "mt-3 w-full"}`}>
-      <input
-        ref={ref}
-        id={LINE_INPUT_ID}
-        type="text"
-        maxLength={MAX_LINE}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder={hasLines ? "What's next?" : "What are you working on?"}
-        aria-label="Add a line: what you're working on"
-        autoComplete="off"
-        enterKeyHint="done"
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            add();
-          } else if (e.key === " " && text === "") {
-            e.preventDefault();
-            update(toggle);
-          } else if (e.key === "Escape") {
-            e.currentTarget.blur();
-          }
-        }}
-        className={
-          big
-            ? // Padding only while the button shows (equal on both sides keeps text centred); otherwise the full width is
-              // free so the placeholder isn't clipped on narrow screens.
-              `block w-full border-b border-line bg-transparent pb-2 text-center leading-snug font-semibold tracking-tight text-fg outline-none placeholder:font-normal placeholder:text-faint focus:border-faint ${canAdd ? "px-[4.5rem] sm:px-24" : "px-0"} ${LEAD_SIZE}`
-            : `block w-full rounded-xl border border-line bg-transparent py-3 pl-3.5 text-[15px] text-fg outline-none placeholder:text-faint focus:border-faint ${canAdd ? "pr-24" : "pr-3.5"}`
-        }
-      />
+    <div className={cn("relative w-full", !big && "mt-3")}>
+      {big ? (
+        // The lead of an empty screen, so deliberately not a <TextInput>. Padding only while the button shows (equal
+        // on both sides keeps text centred); otherwise the full width is free so the placeholder isn't clipped.
+        <input
+          {...inputProps}
+          className={`block w-full border-b border-line bg-transparent pb-2 text-center leading-snug font-semibold tracking-tight text-fg outline-none placeholder:font-normal placeholder:text-faint focus:border-faint ${canAdd ? "px-[4.5rem] sm:px-24" : "px-0"} ${LEAD_SIZE}`}
+        />
+      ) : (
+        <TextInput {...inputProps} className={cn("w-full", canAdd && "pr-24")} />
+      )}
       {canAdd && (
-        <button
-          type="button"
+        <Button
+          variant="solid"
+          size="sm"
+          shortcut="↵"
           aria-label="Add line"
           // Keep focus (and the phone keyboard) in the input while tapping the button.
           onMouseDown={(e) => e.preventDefault()}
           onClick={add}
-          className={`absolute top-1/2 inline-flex min-h-9 -translate-y-1/2 items-center gap-2 rounded-full bg-fg px-4 text-sm font-semibold text-ground transition-opacity hover:opacity-85 ${
-            big ? "right-0" : "right-1.5"
-          }`}
+          className={cn("absolute top-1/2 -translate-y-1/2", big ? "right-0" : "right-1.5")}
         >
           Add
-          <kbd aria-hidden="true" className="text-xs font-normal opacity-60 pointer-coarse:hidden">
-            ↵
-          </kbd>
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -284,32 +286,27 @@ function DoneQuestion({ line }: { line: Line }) {
   }, []);
 
   return (
-    <div role="group" aria-label="Focus done" className="mt-3 rounded-xl border border-line bg-surface p-4">
+    <Card role="group" aria-label="Focus done" className="mt-3 p-4">
       <p className="text-[15px] text-fg">
         Done with <span className="font-medium">“{line.text}”</span>?
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <button
+        <Button
           ref={done}
-          type="button"
+          variant="primary"
+          size="sm"
+          shortcut="D"
           onClick={() => {
             update(markCurrentDone);
             requestAnimationFrame(focusLineInput);
           }}
-          className="inline-flex min-h-9 items-center gap-2.5 rounded-full bg-lamp px-5 text-sm font-semibold text-lamp-fg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg"
         >
           Done
-          <kbd className="text-xs opacity-70 pointer-coarse:hidden">D</kbd>
-        </button>
-        <button
-          type="button"
-          onClick={() => update(keepGoing)}
-          className="inline-flex min-h-9 items-center gap-2.5 rounded-full border border-line px-4 text-sm text-muted transition-colors hover:text-fg"
-        >
+        </Button>
+        <Button variant="outline" size="sm" shortcut="Esc" onClick={() => update(keepGoing)}>
           Still on it
-          <kbd className="text-xs text-faint pointer-coarse:hidden">Esc</kbd>
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }
